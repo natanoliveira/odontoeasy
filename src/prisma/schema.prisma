@@ -1,0 +1,496 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ================================
+// AUTHENTICATION & USER MANAGEMENT
+// ================================
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  avatar    String?
+  role      UserRole @default(CLINIC_ADMIN)
+  provider  String?  // google, email
+  providerId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  clinics      ClinicUser[]
+  appointments Appointment[]
+  documents    Document[]
+  notes        Note[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  SUPER_ADMIN  // Platform admin
+  CLINIC_ADMIN // Clinic owner/admin
+  DENTIST      // Professional dentist
+  ASSISTANT    // Clinic assistant
+}
+
+// ================================
+// CLINIC MANAGEMENT
+// ================================
+
+model Clinic {
+  id          String   @id @default(cuid())
+  name        String
+  cnpj        String?  @unique
+  phone       String?
+  email       String?
+  address     String?
+  city        String?
+  state       String?
+  zipCode     String?
+  website     String?
+  logo        String?
+  description String?
+  settings    Json?    // Clinic-specific settings
+  status      ClinicStatus @default(ACTIVE)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Subscription
+  subscriptionId String?     @unique
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
+
+  // Relationships
+  users         ClinicUser[]
+  professionals Professional[]
+  patients      Patient[]
+  appointments  Appointment[]
+  treatments    Treatment[]
+  documents     Document[]
+  payments      Payment[]
+  rooms         Room[]
+  schedules     Schedule[]
+  odontograms   Odontogram[]
+
+  @@map("clinics")
+}
+
+enum ClinicStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  TRIAL
+}
+
+model ClinicUser {
+  id       String @id @default(cuid())
+  userId   String
+  clinicId String
+  role     UserRole
+  permissions Json? // Specific permissions within the clinic
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clinic Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, clinicId])
+  @@map("clinic_users")
+}
+
+// ================================
+// SUBSCRIPTION & BILLING
+// ================================
+
+model Subscription {
+  id        String   @id @default(cuid())
+  clinicId  String?
+  plan      SubscriptionPlan
+  status    SubscriptionStatus
+  stripeId  String?  @unique
+  customerId String?
+  priceId   String?
+  startDate DateTime
+  endDate   DateTime?
+  cancelAt  DateTime?
+  features  Json?    // Plan features
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  clinic   Clinic?   @relation()
+  payments Payment[]
+
+  @@map("subscriptions")
+}
+
+enum SubscriptionPlan {
+  BASIC
+  PREMIUM
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  UNPAID
+  TRIALING
+}
+
+model Payment {
+  id             String    @id @default(cuid())
+  clinicId       String
+  subscriptionId String?
+  amount         Float
+  currency       String    @default("BRL")
+  status         PaymentStatus
+  stripeId       String?   @unique
+  description    String?
+  paidAt         DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  clinic       Clinic        @relation(fields: [clinicId], references: [id])
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id])
+
+  @@map("payments")
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELED
+}
+
+// ================================
+// PROFESSIONALS MANAGEMENT
+// ================================
+
+model Professional {
+  id          String   @id @default(cuid())
+  clinicId    String
+  name        String
+  email       String?
+  phone       String?
+  cro         String   // Professional license number
+  specialty   String
+  color       String   @default("#3b82f6") // For calendar visualization
+  avatar      String?
+  status      ProfessionalStatus @default(ACTIVE)
+  startDate   DateTime?
+  workDays    String[] // ["monday", "tuesday", ...]
+  workStart   String?  @default("08:00") // Work hour start
+  workEnd     String?  @default("18:00") // Work hour end
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  clinic       Clinic        @relation(fields: [clinicId], references: [id])
+  appointments Appointment[]
+  schedules    Schedule[]
+
+  @@map("professionals")
+}
+
+enum ProfessionalStatus {
+  ACTIVE
+  INACTIVE
+  VACATION
+}
+
+// ================================
+// PATIENT MANAGEMENT
+// ================================
+
+model Patient {
+  id          String   @id @default(cuid())
+  clinicId    String
+  name        String
+  email       String?
+  phone       String?
+  cpf         String?
+  birthDate   DateTime?
+  gender      Gender?
+  address     String?
+  city        String?
+  state       String?
+  zipCode     String?
+  emergencyContact String?
+  medicalHistory Json? // Allergies, medications, conditions
+  notes       String?
+  status      PatientStatus @default(ACTIVE)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  clinic       Clinic        @relation(fields: [clinicId], references: [id])
+  appointments Appointment[]
+  treatments   Treatment[]
+  documents    Document[]
+  odontograms  Odontogram[]
+
+  @@map("patients")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum PatientStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+// ================================
+// APPOINTMENT MANAGEMENT
+// ================================
+
+model Appointment {
+  id             String   @id @default(cuid())
+  clinicId       String
+  patientId      String
+  professionalId String
+  userId         String? // User who created the appointment
+  roomId         String?
+  title          String?
+  description    String?
+  date           DateTime
+  startTime      String
+  endTime        String
+  duration       Int      // Duration in minutes
+  type           String   // Type of appointment
+  status         AppointmentStatus @default(PENDING)
+  value          Float?   // Appointment value
+  notes          String?
+  reminderSent   Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  clinic       Clinic       @relation(fields: [clinicId], references: [id])
+  patient      Patient      @relation(fields: [patientId], references: [id])
+  professional Professional @relation(fields: [professionalId], references: [id])
+  user         User?        @relation(fields: [userId], references: [id])
+  room         Room?        @relation(fields: [roomId], references: [id])
+  treatments   Treatment[]
+
+  @@map("appointments")
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELED
+  NO_SHOW
+  URGENT
+}
+
+// ================================
+// TREATMENT MANAGEMENT
+// ================================
+
+model Treatment {
+  id            String   @id @default(cuid())
+  clinicId      String
+  patientId     String
+  appointmentId String?
+  name          String
+  description   String?
+  tooth         String?  // Tooth number/position
+  status        TreatmentStatus @default(PLANNED)
+  startDate     DateTime?
+  endDate       DateTime?
+  value         Float?
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  clinic      Clinic       @relation(fields: [clinicId], references: [id])
+  patient     Patient      @relation(fields: [patientId], references: [id])
+  appointment Appointment? @relation(fields: [appointmentId], references: [id])
+
+  @@map("treatments")
+}
+
+enum TreatmentStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELED
+}
+
+// ================================
+// CLINIC RESOURCES
+// ================================
+
+model Room {
+  id          String   @id @default(cuid())
+  clinicId    String
+  name        String
+  description String?
+  color       String   @default("#3b82f6")
+  equipment   String[] // List of equipment in the room
+  status      RoomStatus @default(AVAILABLE)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  clinic       Clinic        @relation(fields: [clinicId], references: [id])
+  appointments Appointment[]
+
+  @@map("rooms")
+}
+
+enum RoomStatus {
+  AVAILABLE
+  OCCUPIED
+  MAINTENANCE
+  UNAVAILABLE
+}
+
+model Schedule {
+  id             String   @id @default(cuid())
+  clinicId       String
+  professionalId String?
+  date           DateTime
+  startTime      String
+  endTime        String
+  available      Boolean  @default(true)
+  type           String?  // WORK, BREAK, VACATION, etc.
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  clinic       Clinic        @relation(fields: [clinicId], references: [id])
+  professional Professional? @relation(fields: [professionalId], references: [id])
+
+  @@map("schedules")
+}
+
+// ================================
+// DOCUMENT MANAGEMENT
+// ================================
+
+model Document {
+  id          String   @id @default(cuid())
+  clinicId    String
+  patientId   String?
+  userId      String?
+  name        String
+  description String?
+  type        DocumentType
+  url         String
+  size        Int?     // File size in bytes
+  mimeType    String?
+  tags        String[] // For categorization
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  clinic  Clinic   @relation(fields: [clinicId], references: [id])
+  patient Patient? @relation(fields: [patientId], references: [id])
+  user    User?    @relation(fields: [userId], references: [id])
+
+  @@map("documents")
+}
+
+enum DocumentType {
+  XRAY
+  PHOTO
+  REPORT
+  CONSENT
+  INVOICE
+  OTHER
+}
+
+// ================================
+// DIGITAL ODONTOGRAM
+// ================================
+
+model Odontogram {
+  id        String   @id @default(cuid())
+  clinicId  String
+  patientId String
+  data      Json     // Tooth data structure
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  clinic  Clinic  @relation(fields: [clinicId], references: [id])
+  patient Patient @relation(fields: [patientId], references: [id])
+
+  @@map("odontograms")
+}
+
+// ================================
+// NOTES & COMMUNICATION
+// ================================
+
+model Note {
+  id        String   @id @default(cuid())
+  userId    String
+  content   String
+  type      NoteType @default(GENERAL)
+  entityId  String?  // ID of related entity (patient, appointment, etc.)
+  entityType String? // Type of related entity
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("notes")
+}
+
+enum NoteType {
+  GENERAL
+  PATIENT
+  APPOINTMENT
+  TREATMENT
+  REMINDER
+}
+
+// ================================
+// AUDIT LOG
+// ================================
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String   // CREATE, UPDATE, DELETE, etc.
+  entity    String   // Table/entity name
+  entityId  String?  // ID of the affected entity
+  oldData   Json?    // Previous data
+  newData   Json?    // New data
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@map("audit_logs")
+}
+
+// ================================
+// INDEXES FOR PERFORMANCE
+// ================================
+
+// Index for appointments by date and clinic
+@@index([clinicId, date], map: "appointments_clinic_date_idx", fields: [clinicId, date])
+
+// Index for patients by clinic
+@@index([clinicId], map: "patients_clinic_idx", fields: [clinicId])
+
+// Index for professionals by clinic and status
+@@index([clinicId, status], map: "professionals_clinic_status_idx", fields: [clinicId, status])
+
+// Index for documents by patient
+@@index([patientId], map: "documents_patient_idx", fields: [patientId])
+
+// Index for audit logs by user and date
+@@index([userId, createdAt], map: "audit_logs_user_date_idx", fields: [userId, createdAt])

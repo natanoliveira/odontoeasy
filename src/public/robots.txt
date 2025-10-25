@@ -1,0 +1,18 @@
+User-agent: *
+Disallow: /dashboard
+Disallow: /patients
+Disallow: /appointments
+Disallow: /professionals
+Disallow: /clinic
+Disallow: /documents
+Disallow: /payments
+Disallow: /odontogram
+Disallow: /profile
+Disallow: /admin
+
+Allow: /
+Allow: /booking
+Allow: /plans
+Allow: /login
+
+Sitemap: https://seu-dominio.com/sitemap.xml
