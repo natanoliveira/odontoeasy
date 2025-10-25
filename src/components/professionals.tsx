@@ -93,7 +93,7 @@ const mockProfessionals = [
     workDays: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
     workHours: { start: '08:00', end: '18:00' },
     notes: 'Especialista em tratamentos preventivos e restauradores',
-    avatar: null
+    avatar: null as string | null
   },
   {
     id: 2,
@@ -108,7 +108,7 @@ const mockProfessionals = [
     workDays: ['tuesday', 'wednesday', 'thursday', 'friday', 'saturday'],
     workHours: { start: '09:00', end: '17:00' },
     notes: 'Especialista em aparelhos ortodônticos e alinhadores',
-    avatar: null
+    avatar: null as string | null
   },
   {
     id: 3,
@@ -123,7 +123,7 @@ const mockProfessionals = [
     workDays: ['monday', 'wednesday', 'friday'],
     workHours: { start: '07:00', end: '15:00' },
     notes: 'Especialista em extrações e cirurgias orais complexas',
-    avatar: null
+    avatar: null as string | null
   },
   {
     id: 4,
@@ -138,7 +138,7 @@ const mockProfessionals = [
     workDays: ['monday', 'tuesday', 'thursday'],
     workHours: { start: '13:00', end: '19:00' },
     notes: 'Especialista em tratamentos de canal',
-    avatar: null
+    avatar: null as string | null
   }
 ];
 
@@ -163,7 +163,8 @@ export function Professionals() {
     startDate: '',
     workDays: [] as string[],
     workHours: { start: '08:00', end: '18:00' },
-    notes: ''
+    notes: '',
+    avatar: null as string | null
   });
 
   // Filter professionals
@@ -239,7 +240,8 @@ export function Professionals() {
       startDate: '',
       workDays: [],
       workHours: { start: '08:00', end: '18:00' },
-      notes: ''
+      notes: '',
+      avatar: null as string | null
     });
   };
 
@@ -256,7 +258,8 @@ export function Professionals() {
       startDate: professional.startDate,
       workDays: professional.workDays || [],
       workHours: professional.workHours,
-      notes: professional.notes || ''
+      notes: professional.notes || '',
+      avatar: professional.avatar || null
     });
     setIsEditDialogOpen(true);
   };
@@ -548,7 +551,7 @@ export function Professionals() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <Avatar className="h-12 w-12" style={{ backgroundColor: professional.color + '20' }}>
-                    <AvatarImage src={professional.avatar} />
+                    <AvatarImage src={professional.avatar || undefined} />
                     <AvatarFallback 
                       className="text-white" 
                       style={{ backgroundColor: professional.color }}

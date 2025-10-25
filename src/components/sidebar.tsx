@@ -127,7 +127,7 @@ export function Sidebar({ userRole, onLogout }: SidebarProps) {
             return (
               <li key={item.path}>
                 <Link
-                  to={item.path}
+                  href={item.path}
                   onClick={() => isMobile && setIsOpen(false)}
                   className={cn(
                     "flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors",

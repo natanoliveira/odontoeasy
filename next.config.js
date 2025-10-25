@@ -5,6 +5,7 @@ const nextConfig = {
   images: {
     domains: ['images.unsplash.com', 'unsplash.com'],
     formats: ['image/webp', 'image/avif'],
+    unoptimized: true,
   },
   experimental: {
     optimizeCss: true,
@@ -20,6 +21,13 @@ const nextConfig = {
         permanent: false,
       },
     ];
+  },
+  // Disable static optimization for pages with SSR requirements
+  eslint: {
+    ignoreDuringBuilds: false,
+  },
+  typescript: {
+    ignoreBuildErrors: false,
   },
 };
 

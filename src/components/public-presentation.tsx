@@ -172,10 +172,10 @@ export function PublicPresentation() {
               </Link>
             </nav>
             <div className="flex space-x-3">
-              <Link to="/login">
+              <Link href="/login">
                 <Button variant="outline">Entrar</Button>
               </Link>
-              <Link to="/plans">
+              <Link href="/plans">
                 <Button>Teste Grátis</Button>
               </Link>
             </div>
@@ -197,7 +197,7 @@ export function PublicPresentation() {
             Modernize sua clínica e ofereça uma experiência excepcional aos seus pacientes.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/plans">
+            <Link href="/plans">
               <Button size="lg" className="px-8">
                 Começar Teste Grátis
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -356,7 +356,7 @@ export function PublicPresentation() {
                       </li>
                     ))}
                   </ul>
-                  <Link to="/plans">
+                  <Link href="/plans">
                     <Button className="w-full" variant={plan.highlighted ? 'default' : 'outline'}>
                       Começar Teste Grátis
                     </Button>
@@ -379,7 +379,7 @@ export function PublicPresentation() {
             Comece seu teste gratuito agora mesmo.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/plans">
+            <Link href="/plans">
               <Button size="lg" className="px-8 bg-white text-dental-navy-blue hover:bg-gray-100">
                 Teste Grátis por 7 Dias
                 <ArrowRight className="ml-2 h-4 w-4" />
