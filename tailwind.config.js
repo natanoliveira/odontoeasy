@@ -1,9 +1,11 @@
 /** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
+  darkMode: ["class"],
   content: [
-    "./pages/**/*.{js,ts,jsx,tsx}",
-    "./components/**/*.{js,ts,jsx,tsx}",
-    "./lib/**/*.{js,ts,jsx,tsx}",
+    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/lib/**/*.{js,ts,jsx,tsx}",
+    "./src/hooks/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
@@ -97,5 +99,5 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [require("tailwindcss-animate")],
 };
