@@ -7,9 +7,6 @@ const nextConfig = {
     formats: ['image/webp', 'image/avif'],
     unoptimized: true,
   },
-  experimental: {
-    optimizeCss: true,
-  },
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
@@ -22,7 +19,6 @@ const nextConfig = {
       },
     ];
   },
-  // Disable static optimization for pages with SSR requirements
   eslint: {
     ignoreDuringBuilds: false,
   },
