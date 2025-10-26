@@ -5,7 +5,7 @@ import { Label } from './ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Textarea } from './ui/textarea';
-import { 
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -23,7 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from './ui/alert-dialog';
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -31,7 +31,7 @@ import {
   SelectValue,
 } from './ui/select';
 import { Calendar } from './ui/calendar';
-import { 
+import {
   Table,
   TableBody,
   TableCell,
@@ -40,9 +40,9 @@ import {
   TableRow,
 } from './ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { 
-  Plus, 
-  Calendar as CalendarIcon, 
+import {
+  Plus,
+  Calendar as CalendarIcon,
   Clock,
   User,
   CheckCircle,
@@ -212,7 +212,7 @@ export function Appointments() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDentist, setFilterDentist] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
-  
+
   const [formData, setFormData] = useState({
     patientId: '',
     patientName: '',
@@ -241,12 +241,12 @@ export function Appointments() {
   const filteredAppointments = useMemo(() => {
     return appointments.filter(apt => {
       const matchesSearch = apt.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           apt.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           apt.dentistName.toLowerCase().includes(searchTerm.toLowerCase());
-      
+        apt.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        apt.dentistName.toLowerCase().includes(searchTerm.toLowerCase());
+
       const matchesDentist = filterDentist === 'all' || apt.dentistId.toString() === filterDentist;
       const matchesStatus = filterStatus === 'all' || apt.status === filterStatus;
-      
+
       let matchesDate = true;
       if (selectedDate && viewMode === 'day') {
         matchesDate = apt.date === selectedDate.toISOString().split('T')[0];
@@ -255,11 +255,11 @@ export function Appointments() {
         startOfWeek.setDate(selectedDate.getDate() - selectedDate.getDay());
         const endOfWeek = new Date(startOfWeek);
         endOfWeek.setDate(startOfWeek.getDate() + 6);
-        
+
         const aptDate = new Date(apt.date);
         matchesDate = aptDate >= startOfWeek && aptDate <= endOfWeek;
       }
-      
+
       return matchesSearch && matchesDentist && matchesStatus && matchesDate;
     });
   }, [appointments, searchTerm, filterDentist, filterStatus, selectedDate, viewMode]);
@@ -289,11 +289,13 @@ export function Appointments() {
       room: formData.room,
       value: parseFloat(formData.value) || 0
     };
-    
+
     setAppointments([...appointments, newAppointment]);
     resetForm();
     setIsAddDialogOpen(false);
   };
+
+  console.log('appointments', appointments);
 
   const handleEditAppointment = () => {
     if (!editingAppointment) return;
@@ -318,10 +320,10 @@ export function Appointments() {
       value: parseFloat(formData.value) || 0
     };
 
-    setAppointments(appointments.map(apt => 
+    setAppointments(appointments.map(apt =>
       apt.id === editingAppointment.id ? updatedAppointment : apt
     ));
-    
+
     resetForm();
     setIsEditDialogOpen(false);
     setEditingAppointment(null);
@@ -336,7 +338,7 @@ export function Appointments() {
   };
 
   const handleStatusChange = (id: number, newStatus: string) => {
-    setAppointments(appointments.map(apt => 
+    setAppointments(appointments.map(apt =>
       apt.id === id ? { ...apt, status: newStatus as any } : apt
     ));
   };
@@ -433,8 +435,8 @@ export function Appointments() {
           <Label htmlFor="patientSelect">Paciente</Label>
           <Select value={formData.patientId} onValueChange={(value) => {
             const patient = mockPatients.find(p => p.id.toString() === value);
-            setFormData({ 
-              ...formData, 
+            setFormData({
+              ...formData,
               patientId: value,
               patientName: patient?.name || ''
             });
@@ -461,8 +463,8 @@ export function Appointments() {
               {mockDentists.filter(d => d.status === 'active').map((dentist) => (
                 <SelectItem key={dentist.id} value={dentist.id.toString()}>
                   <div className="flex items-center space-x-2">
-                    <div 
-                      className="w-3 h-3 rounded-full" 
+                    <div
+                      className="w-3 h-3 rounded-full"
                       style={{ backgroundColor: dentist.color }}
                     />
                     <span>{dentist.name} - {dentist.speciality}</span>
@@ -593,7 +595,7 @@ export function Appointments() {
           <h1 className="text-2xl font-semibold">Agenda Completa</h1>
           <p className="text-muted-foreground">Gerencie todos os agendamentos da clínica</p>
         </div>
-        
+
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <Button>
@@ -653,7 +655,7 @@ export function Appointments() {
                   ))}
                 </SelectContent>
               </Select>
-              
+
               <Select value={filterStatus} onValueChange={setFilterStatus}>
                 <SelectTrigger className="w-[150px]">
                   <SelectValue placeholder="Todos os status" />
@@ -705,11 +707,11 @@ export function Appointments() {
                     <div className="flex items-center space-x-2">
                       <CalendarIcon className="h-5 w-5" />
                       <span>
-                        {selectedDate?.toLocaleDateString('pt-BR', { 
-                          weekday: 'long', 
-                          year: 'numeric', 
-                          month: 'long', 
-                          day: 'numeric' 
+                        {selectedDate?.toLocaleDateString('pt-BR', {
+                          weekday: 'long',
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
                         }) || 'Selecione uma data'}
                       </span>
                     </div>
@@ -729,98 +731,98 @@ export function Appointments() {
                       {filteredAppointments
                         .sort((a, b) => a.time.localeCompare(b.time))
                         .map((appointment) => (
-                        <div 
-                          key={appointment.id} 
-                          className="border rounded-lg p-4 hover:shadow-md transition-shadow"
-                          style={{ borderLeftColor: getDentistColor(appointment.dentistId), borderLeftWidth: '4px' }}
-                        >
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center space-x-3">
-                              {getStatusIcon(appointment.status)}
-                              <div>
-                                <h3 className="font-semibold">{appointment.patientName}</h3>
-                                <p className="text-sm text-muted-foreground">{appointment.dentistName}</p>
+                          <div
+                            key={appointment.id}
+                            className="border rounded-lg p-4 hover:shadow-md transition-shadow"
+                            style={{ borderLeftColor: getDentistColor(appointment.dentistId), borderLeftWidth: '4px' }}
+                          >
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center space-x-3">
+                                {getStatusIcon(appointment.status)}
+                                <div>
+                                  <h3 className="font-semibold">{appointment.patientName}</h3>
+                                  <p className="text-sm text-muted-foreground">{appointment.dentistName}</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                {getStatusBadge(appointment.status)}
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => openEditDialog(appointment)}
+                                >
+                                  <Edit2 className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => openDeleteDialog(appointment.id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
                               </div>
                             </div>
-                            <div className="flex items-center space-x-2">
-                              {getStatusBadge(appointment.status)}
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => openEditDialog(appointment)}
-                              >
-                                <Edit2 className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => openDeleteDialog(appointment.id)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                          
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                            <div className="flex items-center space-x-2">
-                              <Clock className="h-4 w-4 text-muted-foreground" />
-                              <span>{appointment.time} - {appointment.endTime}</span>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <User className="h-4 w-4 text-muted-foreground" />
-                              <span>{appointment.type}</span>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <MapPin className="h-4 w-4 text-muted-foreground" />
-                              <span>{appointment.room}</span>
-                            </div>
-                          </div>
-                          
-                          {appointment.notes && (
-                            <div className="mt-3 p-2 bg-muted rounded-md">
-                              <div className="flex items-start space-x-2">
-                                <FileText className="h-4 w-4 text-muted-foreground mt-0.5" />
-                                <p className="text-sm">{appointment.notes}</p>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                              <div className="flex items-center space-x-2">
+                                <Clock className="h-4 w-4 text-muted-foreground" />
+                                <span>{appointment.time} - {appointment.endTime}</span>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <User className="h-4 w-4 text-muted-foreground" />
+                                <span>{appointment.type}</span>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <MapPin className="h-4 w-4 text-muted-foreground" />
+                                <span>{appointment.room}</span>
                               </div>
                             </div>
-                          )}
-                          
-                          <div className="flex justify-between items-center mt-4">
-                            <div className="text-sm">
-                              <strong>Valor: R$ {appointment.value?.toFixed(2) || '0,00'}</strong>
-                            </div>
-                            <div className="flex space-x-2">
-                              {appointment.status === 'pending' && (
-                                <Button 
-                                  size="sm" 
-                                  variant="outline"
-                                  onClick={() => handleStatusChange(appointment.id, 'confirmed')}
-                                >
-                                  Confirmar
-                                </Button>
-                              )}
-                              {appointment.status === 'confirmed' && (
-                                <Button 
-                                  size="sm" 
-                                  variant="outline"
-                                  onClick={() => handleStatusChange(appointment.id, 'completed')}
-                                >
-                                  Concluir
-                                </Button>
-                              )}
-                              {appointment.status !== 'cancelled' && appointment.status !== 'completed' && (
-                                <Button 
-                                  size="sm" 
-                                  variant="outline"
-                                  onClick={() => handleStatusChange(appointment.id, 'cancelled')}
-                                >
-                                  Cancelar
-                                </Button>
-                              )}
+
+                            {appointment.notes && (
+                              <div className="mt-3 p-2 bg-muted rounded-md">
+                                <div className="flex items-start space-x-2">
+                                  <FileText className="h-4 w-4 text-muted-foreground mt-0.5" />
+                                  <p className="text-sm">{appointment.notes}</p>
+                                </div>
+                              </div>
+                            )}
+
+                            <div className="flex justify-between items-center mt-4">
+                              <div className="text-sm">
+                                <strong>Valor: R$ {appointment.value?.toFixed(2) || '0,00'}</strong>
+                              </div>
+                              <div className="flex space-x-2">
+                                {appointment.status === 'pending' && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleStatusChange(appointment.id, 'confirmed')}
+                                  >
+                                    Confirmar
+                                  </Button>
+                                )}
+                                {appointment.status === 'confirmed' && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleStatusChange(appointment.id, 'completed')}
+                                  >
+                                    Concluir
+                                  </Button>
+                                )}
+                                {appointment.status !== 'cancelled' && appointment.status !== 'completed' && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleStatusChange(appointment.id, 'cancelled')}
+                                  >
+                                    Cancelar
+                                  </Button>
+                                )}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
                     </div>
                   )}
                 </CardContent>
@@ -868,39 +870,39 @@ export function Appointments() {
                     {appointments
                       .sort((a, b) => new Date(a.date + ' ' + a.time).getTime() - new Date(b.date + ' ' + b.time).getTime())
                       .map((appointment) => (
-                      <TableRow key={appointment.id}>
-                        <TableCell className="font-medium">{appointment.patientName}</TableCell>
-                        <TableCell>{appointment.dentistName}</TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            <div>{new Date(appointment.date).toLocaleDateString('pt-BR')}</div>
-                            <div className="text-sm text-muted-foreground">{appointment.time} - {appointment.endTime}</div>
-                          </div>
-                        </TableCell>
-                        <TableCell>{appointment.type}</TableCell>
-                        <TableCell>{appointment.duration}min</TableCell>
-                        <TableCell>{getStatusBadge(appointment.status)}</TableCell>
-                        <TableCell>R$ {appointment.value?.toFixed(2) || '0,00'}</TableCell>
-                        <TableCell>
-                          <div className="flex space-x-1">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => openEditDialog(appointment)}
-                            >
-                              <Edit2 className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => openDeleteDialog(appointment.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                        <TableRow key={appointment.id}>
+                          <TableCell className="font-medium">{appointment.patientName}</TableCell>
+                          <TableCell>{appointment.dentistName}</TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              <div>{new Date(appointment.date).toLocaleDateString('pt-BR')}</div>
+                              <div className="text-sm text-muted-foreground">{appointment.time} - {appointment.endTime}</div>
+                            </div>
+                          </TableCell>
+                          <TableCell>{appointment.type}</TableCell>
+                          <TableCell>{appointment.duration}min</TableCell>
+                          <TableCell>{getStatusBadge(appointment.status)}</TableCell>
+                          <TableCell>R$ {appointment.value?.toFixed(2) || '0,00'}</TableCell>
+                          <TableCell>
+                            <div className="flex space-x-1">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => openEditDialog(appointment)}
+                              >
+                                <Edit2 className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => openDeleteDialog(appointment.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                   </TableBody>
                 </Table>
               </div>

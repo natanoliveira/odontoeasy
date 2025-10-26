@@ -1,0 +1,46 @@
+Arquitetura
+
+  - Estrutura de diretórios completa para API routes
+  - Stack tecnológica (Next.js, Prisma, PostgreSQL, NextAuth)
+  - Middleware de autenticação e error handling
+  - Validação com Zod
+
+  Endpoints Mapeados
+
+  Todos os endpoints necessários para conectar com o frontend atual:
+  - Patients API - CRUD completo (src/components/patients.tsx:1)
+  - Appointments API - Agendamentos (src/components/appointments.tsx:1)
+  - Professionals API - Profissionais
+  - Treatments API - Atendimentos (src/components/attendance.tsx:1)
+  - Documents API - Upload e gestão de documentos
+  - Odontogram API - Odontograma digital
+  - Payments API - Integração com Stripe
+
+  Estratégia de Autenticação
+
+  - JWT com sessions de 30 dias
+  - RBAC com 4 níveis: SUPER_ADMIN, CLINIC_ADMIN, DENTIST, ASSISTANT
+  - Suporte multi-clínica via ClinicUser
+  - Middleware de autorização por role
+
+  Variáveis de Ambiente
+
+  Lista completa de todas as variáveis necessárias:
+  - Database URL
+  - NextAuth secrets
+  - Google OAuth credentials
+  - AWS S3 para documentos
+  - Stripe para pagamentos
+  - SendGrid para emails
+
+  Workflow de Desenvolvimento
+
+  Dividido em 5 fases:
+  1. Semana 1: Setup (PostgreSQL, Prisma, OAuth, Middleware)
+  2. Semanas 2-3: Core APIs (Patients, Appointments, Professionals, Treatments)
+  3. Semana 4: Features avançadas (Documents, Odontogram, Payments)
+  4. Semana 5: Testes e otimização
+
+  Checklist de Próximos Passos
+
+  Lista completa de ações imediatas, desenvolvimento backend e integração frontend.

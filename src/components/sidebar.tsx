@@ -1,21 +1,22 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { 
-  LayoutDashboard, 
-  Users, 
-  Calendar, 
+import {
+  LayoutDashboard,
+  Users,
+  Calendar,
   UserCheck,
-  Building2, 
-  FileText, 
-  CreditCard, 
+  Building2,
+  FileText,
+  CreditCard,
   Smile,
   Shield,
   BarChart3,
   Settings,
   LogOut,
   Menu,
-  X
+  X,
+  Stethoscope
 } from 'lucide-react';
 import { cn } from './ui/utils';
 import { Button } from './ui/button';
@@ -35,6 +36,7 @@ const clinicMenuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
   { icon: Users, label: 'Pacientes', path: '/patients' },
   { icon: Calendar, label: 'Agendamentos', path: '/appointments' },
+  { icon: Stethoscope, label: 'Atendimentos', path: '/attendance' },
   { icon: UserCheck, label: 'Profissionais', path: '/professionals' },
   { icon: Building2, label: 'Clínica', path: '/clinic' },
   { icon: FileText, label: 'Documentos', path: '/documents' },

@@ -476,21 +476,3 @@ model AuditLog {
   @@map("audit_logs")
 }
 
-// ================================
-// INDEXES FOR PERFORMANCE
-// ================================
-
-// Index for appointments by date and clinic
-@@index([clinicId, date], map: "appointments_clinic_date_idx", fields: [clinicId, date])
-
-// Index for patients by clinic
-@@index([clinicId], map: "patients_clinic_idx", fields: [clinicId])
-
-// Index for professionals by clinic and status
-@@index([clinicId, status], map: "professionals_clinic_status_idx", fields: [clinicId, status])
-
-// Index for documents by patient
-@@index([patientId], map: "documents_patient_idx", fields: [patientId])
-
-// Index for audit logs by user and date
-@@index([userId, createdAt], map: "audit_logs_user_date_idx", fields: [userId, createdAt])

@@ -48,8 +48,8 @@
 
 1. **Clone o repositório**
    ```bash
-   git clone https://github.com/natanoliveira/odontoeasy.git
-   cd odontoeasy
+   git clone https://github.com/natanoliveira/odontogestor.git
+   cd odontogestor
    ```
 
 2. **Instale as dependências**
@@ -130,7 +130,7 @@
 ## 📁 Estrutura do Projeto
 
 ```
-odontoeasy/
+odontogestor/
 ├── src/
 │   ├── pages/                   # Páginas Next.js (18 rotas)
 │   │   ├── _app.tsx            # App wrapper principal
@@ -486,7 +486,7 @@ Este projeto é privado e todos os direitos são reservados.
 **Natan Oliveira**
 
 - GitHub: [@natanoliveira](https://github.com/natanoliveira)
-- Projeto: [odontoeasy](https://github.com/natanoliveira/odontoeasy)
+- Projeto: [odontogestor](https://github.com/natanoliveira/odontogestor)
 
 ---
 

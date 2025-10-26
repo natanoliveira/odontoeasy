@@ -1,4 +1,4 @@
-# 🧠 CONTEXTO DO PROJETO - DentalSaaS (OdontoEasy)
+# 🧠 CONTEXTO DO PROJETO - DentalSaaS (OdontoGestor)
 
 **Data:** 25 de Outubro de 2025
 **Versão:** 0.1.0
@@ -73,7 +73,7 @@ PostgreSQL Database
 ## 📁 ESTRUTURA COMPLETA
 
 ```
-odontoeasy/
+odontogestor/
 ├── DIAGNOSTICO.md          # Análise detalhada (700+ linhas)
 ├── CONTEXTO.md            # Este arquivo (resumo executivo)
 ├── README.md              # Documentação principal
@@ -475,7 +475,7 @@ npm run lint
 
 ## 🔗 LINKS IMPORTANTES
 
-- **Repositório:** https://github.com/natanoliveira/odontoeasy
+- **Repositório:** https://github.com/natanoliveira/odontogestor
 - **Figma:** https://www.figma.com/design/b0QBGuEMPgPfaUu9M1UUgU/
 - **shadcn/ui:** https://ui.shadcn.com/
 - **Next.js Docs:** https://nextjs.org/docs

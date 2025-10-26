@@ -1,0 +1,64 @@
+ Próximos Passos (conforme IMPLEMENTATION-PLAN.md):
+
+  Fase 1: Infraestrutura Base (1-2 dias)
+
+  Criar arquivos base:
+  1. src/lib/prisma.ts - Singleton do Prisma Client
+  2. src/lib/validation.ts - Schemas Zod para validação
+  3. src/middleware/errorHandler.ts - Handler de erros global
+  4. src/middleware/auth.ts - Middleware de autenticação (mock temporário)
+  5. src/types/api.ts - Tipos TypeScript
+
+  Fase 2: API de Pacientes (2 dias)
+
+  Implementar:
+  - src/pages/api/patients/index.ts - GET (listar) e POST (criar)
+  - src/pages/api/patients/[id].ts - GET, PUT, DELETE
+  - Testes com cURL conforme documentado
+
+  Fase 3-5: Outras APIs (4-6 dias)
+
+  - Professionals
+  - Appointments
+  - Treatments
+
+  Fase 6: Integração Frontend (1 dia)
+
+  - Criar src/lib/api-client.ts
+  - Substituir mock data em patients.tsx, attendance.tsx, etc.
+  
+Comandos Úteis:
+
+  # Ver dados no Prisma Studio
+  npm run prisma:studio
+
+  # Regenerar Prisma Client (após alterar schema)
+  npx prisma generate --schema=src/prisma/schema.prisma
+
+  # Reset banco (DEV ONLY!)
+  npx prisma migrate reset --schema=src/prisma/schema.prisma
+
+  # Nova migration
+  npx prisma migrate dev --name nome_da_migration --schema=src/prisma/schema.prisma
+
+  # Rodar seed manualmente
+  npm run prisma:seed
+
+  ---
+  Credenciais dos Usuários (do seed):
+
+  Super Admin:
+  - Email: admin@denticare.com.br
+  - Role: SUPER_ADMIN
+
+  Admin da Clínica:
+  - Email: admin@clinicasorriso.com.br
+  - Role: CLINIC_ADMIN
+  - Nome: Dr. Carlos Roberto Silva
+
+  Dentistas:
+  - dra.ana@clinicasorriso.com.br (Ortodontia)
+  - dr.ricardo@clinicasorriso.com.br (Implantodontia)
+
+  Assistente:
+  - maria@clinicasorriso.com.br

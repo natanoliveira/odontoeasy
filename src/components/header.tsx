@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { useIsMobile } from './ui/use-mobile';
-import { 
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -71,16 +71,16 @@ export function Header({ onLogout, userRole }: HeaderProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <h2 className={`font-semibold text-foreground ${isMobile ? 'text-base' : 'text-lg'}`}>
-              {isMobile ? 'DentalSaaS' : 'Sistema de Gestão Odontológica'}
+              {isMobile ? 'OdontoGestor' : 'OdontoGestor - Gestão Completa para Clínicas Odontológicas'}
             </h2>
           </div>
-          
+
           <div className="flex items-center space-x-4">
             <div className="hidden sm:block text-right">
               <div className="text-sm font-medium">{userInfo.name}</div>
               <div className="text-xs text-muted-foreground">{userInfo.email}</div>
             </div>
-            
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">

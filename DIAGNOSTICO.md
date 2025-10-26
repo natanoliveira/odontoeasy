@@ -1,4 +1,4 @@
-# 🏥 DIAGNÓSTICO COMPLETO - DentalSaaS (OdontoEasy)
+# 🏥 DIAGNÓSTICO COMPLETO - DentalSaaS (OdontoGestor)
 
 **Data da Análise:** 25 de Outubro de 2025
 **Projeto:** Sistema de Gestão de Clínicas Odontológicas
@@ -19,7 +19,7 @@ O projeto DentalSaaS está **95% implementado em Next.js**, mas ainda mantém ar
 ### Estrutura de Diretórios Atual
 
 ```
-/odontoeasy/
+/odontogestor/
 ├── src/
 │   ├── pages/              # ✅ Next.js (15 páginas)
 │   ├── components/         # ✅ 69 componentes

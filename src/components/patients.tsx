@@ -69,6 +69,9 @@ export function Patients() {
   const [patients, setPatients] = useState(mockPatients);
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -95,8 +98,43 @@ export function Patients() {
     setIsAddDialogOpen(false);
   };
 
-  const handleDeletePatient = (id: number) => {
-    setPatients(patients.filter(p => p.id !== id));
+  const handleViewPatient = (patient: any) => {
+    setSelectedPatient(patient);
+    setIsViewDialogOpen(true);
+  };
+
+  const handleEditPatient = (patient: any) => {
+    setSelectedPatient(patient);
+    setFormData({
+      name: patient.name,
+      email: patient.email,
+      phone: patient.phone,
+      birthDate: patient.birthDate,
+      address: patient.address,
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdatePatient = () => {
+    setPatients(patients.map(p =>
+      p.id === selectedPatient.id
+        ? { ...p, ...formData }
+        : p
+    ));
+    setFormData({ name: '', email: '', phone: '', birthDate: '', address: '' });
+    setSelectedPatient(null);
+    setIsEditDialogOpen(false);
+  };
+
+  const handleDeleteClick = (patient: any) => {
+    setSelectedPatient(patient);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    setPatients(patients.filter(p => p.id !== selectedPatient.id));
+    setSelectedPatient(null);
+    setIsDeleteDialogOpen(false);
   };
 
   const calculateAge = (birthDate: string) => {
@@ -246,16 +284,24 @@ export function Patients() {
                   </TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
-                      <Button variant="ghost" size="sm">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleViewPatient(patient)}
+                      >
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="sm">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditPatient(patient)}
+                      >
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="sm"
-                        onClick={() => handleDeletePatient(patient.id)}
+                        onClick={() => handleDeleteClick(patient)}
                         className="text-destructive hover:text-destructive"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -268,6 +314,179 @@ export function Patients() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* View Patient Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Detalhes do Paciente</DialogTitle>
+            <DialogDescription>
+              Informações completas do paciente
+            </DialogDescription>
+          </DialogHeader>
+          {selectedPatient && (
+            <div className="space-y-4">
+              <div>
+                <Label className="text-muted-foreground">Nome Completo</Label>
+                <p className="font-medium">{selectedPatient.name}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Email</Label>
+                  <p className="text-sm">{selectedPatient.email}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Telefone</Label>
+                  <p className="text-sm">{selectedPatient.phone}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Data de Nascimento</Label>
+                  <p className="text-sm">{new Date(selectedPatient.birthDate).toLocaleDateString('pt-BR')}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Idade</Label>
+                  <p className="text-sm">{calculateAge(selectedPatient.birthDate)} anos</p>
+                </div>
+              </div>
+              <div>
+                <Label className="text-muted-foreground">Endereço</Label>
+                <p className="text-sm">{selectedPatient.address}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Última Visita</Label>
+                  <p className="text-sm">{new Date(selectedPatient.lastVisit).toLocaleDateString('pt-BR')}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Status</Label>
+                  <Badge variant={selectedPatient.status === 'active' ? 'default' : 'secondary'}>
+                    {selectedPatient.status === 'active' ? 'Ativo' : 'Inativo'}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Patient Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Editar Paciente</DialogTitle>
+            <DialogDescription>
+              Atualize os dados do paciente
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="edit-name">Nome Completo</Label>
+              <Input
+                id="edit-name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="Nome do paciente"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-email">Email</Label>
+              <Input
+                id="edit-email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                placeholder="email@exemplo.com"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-phone">Telefone</Label>
+              <Input
+                id="edit-phone"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                placeholder="(11) 99999-9999"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-birthDate">Data de Nascimento</Label>
+              <Input
+                id="edit-birthDate"
+                type="date"
+                value={formData.birthDate}
+                onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-address">Endereço</Label>
+              <Input
+                id="edit-address"
+                value={formData.address}
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                placeholder="Endereço completo"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={handleUpdatePatient} className="flex-1">
+                Salvar Alterações
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsEditDialogOpen(false);
+                  setFormData({ name: '', email: '', phone: '', birthDate: '', address: '' });
+                }}
+                className="flex-1"
+              >
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirmar Exclusão</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja excluir este paciente?
+            </DialogDescription>
+          </DialogHeader>
+          {selectedPatient && (
+            <div className="space-y-4">
+              <div className="p-4 bg-muted rounded-lg">
+                <p className="font-medium">{selectedPatient.name}</p>
+                <p className="text-sm text-muted-foreground">{selectedPatient.email}</p>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Esta ação não pode ser desfeita. Todos os dados do paciente serão permanentemente removidos.
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  variant="destructive"
+                  onClick={handleConfirmDelete}
+                  className="flex-1"
+                >
+                  Excluir Paciente
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsDeleteDialogOpen(false);
+                    setSelectedPatient(null);
+                  }}
+                  className="flex-1"
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
