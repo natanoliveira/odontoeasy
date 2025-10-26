@@ -3,6 +3,7 @@ import { prisma } from '../../../lib/prisma';
 import { handleError, ApiError } from '../../../middleware/errorHandler';
 import { createPatientSchema } from '../../../lib/validation';
 import { getClinicId } from '../../../middleware/auth';
+import { AppointmentStatus } from '@prisma/client';
 
 /**
  * API Route: /api/patients
@@ -58,15 +59,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         prisma.patient.count({ where }),
       ]);
 
-      return res.status(200).json({
-        patients,
+      // Pega a última visita do paciente na clinica
+      const patientsWithLastVisit = await Promise.all(
+        patients.map(async (patient) => {
+          const visit = await prisma.appointment.findFirst({
+            where: {
+              patientId: patient.id,
+              status: {
+                in: [AppointmentStatus.CONFIRMED, AppointmentStatus.COMPLETED],
+              },
+            },
+            orderBy: { date: 'desc' },
+          });
+
+          return {
+            ...patient,
+            lastAppointment: visit || null,
+          };
+        })
+      );
+
+      const objResponse = {
+        patients: patientsWithLastVisit,
         pagination: {
           total,
           page: parseInt(page as string),
           limit: parseInt(limit as string),
           pages: Math.ceil(total / take),
         },
-      });
+      }
+
+      return res.status(200).json(objResponse);
     }
 
     if (req.method === 'POST') {
@@ -90,8 +113,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(201).json({ patient });
     }
 
-    // Method not allowed
-    return res.status(405).json({ error: 'Method not allowed' });
+    // Método não permitido
+    return res.status(405).json({ error: 'Método não permitido' });
   } catch (error) {
     handleError(error, res);
   }

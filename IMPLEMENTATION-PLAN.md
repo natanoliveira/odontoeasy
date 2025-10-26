@@ -309,7 +309,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(201).json({ patient });
     }
 
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ error: 'Método não permitido' });
   } catch (error) {
     handleError(error, res);
   }
@@ -339,7 +339,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     if (!existingPatient) {
-      throw new ApiError(404, 'Patient not found');
+      throw new ApiError(404, 'Paciente não encontrado');
     }
 
     if (req.method === 'GET') {
@@ -389,7 +389,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(200).json({ success: true, patient });
     }
 
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ error: 'Método não permitido' });
   } catch (error) {
     handleError(error, res);
   }
@@ -465,7 +465,7 @@ curl -X DELETE "http://localhost:3000/api/patients/[ID_DO_PACIENTE]" \
 
 # 6.1 - GET paciente inexistente
 curl -X GET "http://localhost:3000/api/patients/cuid_invalido"
-# Esperado: Status 404, error: 'Patient not found'
+# Esperado: Status 404, error: 'Paciente não encontrado'
 
 # 6.2 - POST com dados inválidos
 curl -X POST "http://localhost:3000/api/patients" \

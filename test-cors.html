@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste CORS - OdontoGestor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-result {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Teste de CORS - OdontoGestor API</h1>
+
+    <div>
+        <button onclick="testLogin()">Testar Login (POST)</button>
+        <button onclick="testDashboard()">Testar Dashboard Stats (GET)</button>
+        <button onclick="testPatients()">Testar Pacientes (GET)</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+
+        function showResult(title, success, data) {
+            const resultsDiv = document.getElementById('results');
+            const resultClass = success ? 'success' : 'error';
+            const resultHtml = `
+                <div class="test-result ${resultClass}">
+                    <h3>${title}</h3>
+                    <p><strong>Status:</strong> ${success ? 'Sucesso' : 'Erro'}</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                </div>
+            `;
+            resultsDiv.innerHTML = resultHtml + resultsDiv.innerHTML;
+        }
+
+        async function testLogin() {
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'admin@clinicasorriso.com.br',
+                        password: 'senha123'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Salvar token para próximos testes
+                    if (data.token) {
+                        localStorage.setItem('testToken', data.token);
+                    }
+                    showResult('Login', true, data);
+                } else {
+                    showResult('Login', false, data);
+                }
+            } catch (error) {
+                showResult('Login', false, { error: error.message });
+            }
+        }
+
+        async function testDashboard() {
+            try {
+                const token = localStorage.getItem('testToken');
+                const headers = {
+                    'Content-Type': 'application/json',
+                };
+
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+
+                const response = await fetch(`${API_BASE}/dashboard/stats`, {
+                    method: 'GET',
+                    headers
+                });
+
+                const data = await response.json();
+                showResult('Dashboard Stats', response.ok, data);
+            } catch (error) {
+                showResult('Dashboard Stats', false, { error: error.message });
+            }
+        }
+
+        async function testPatients() {
+            try {
+                const token = localStorage.getItem('testToken');
+                const headers = {
+                    'Content-Type': 'application/json',
+                };
+
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+
+                const response = await fetch(`${API_BASE}/patients?page=1&limit=5`, {
+                    method: 'GET',
+                    headers
+                });
+
+                const data = await response.json();
+                showResult('Pacientes', response.ok, data);
+            } catch (error) {
+                showResult('Pacientes', false, { error: error.message });
+            }
+        }
+    </script>
+</body>
+</html>

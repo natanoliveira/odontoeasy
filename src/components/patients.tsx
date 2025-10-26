@@ -4,7 +4,7 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
-import { 
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from './ui/dialog';
-import { 
+import {
   Table,
   TableBody,
   TableCell,
@@ -20,53 +20,54 @@ import {
   TableHeader,
   TableRow,
 } from './ui/table';
-import { 
-  Plus, 
-  Search, 
-  Eye, 
-  Edit, 
+import {
+  Plus,
+  Search,
+  Eye,
+  Edit,
   Trash2,
   Phone,
   Mail,
   Calendar
 } from 'lucide-react';
+import { usePatients } from '@/hooks/use-patients';
 
 // Mock data
-const mockPatients = [
-  {
-    id: 1,
-    name: 'Maria Silva',
-    email: 'maria.silva@email.com',
-    phone: '(11) 99999-1234',
-    birthDate: '1985-03-15',
-    address: 'Rua das Flores, 123',
-    lastVisit: '2024-01-15',
-    status: 'active'
-  },
-  {
-    id: 2,
-    name: 'João Santos',
-    email: 'joao.santos@email.com',
-    phone: '(11) 88888-5678',
-    birthDate: '1992-07-22',
-    address: 'Av. Principal, 456',
-    lastVisit: '2024-01-10',
-    status: 'active'
-  },
-  {
-    id: 3,
-    name: 'Ana Costa',
-    email: 'ana.costa@email.com',
-    phone: '(11) 77777-9012',
-    birthDate: '1978-11-08',
-    address: 'Rua do Centro, 789',
-    lastVisit: '2023-12-20',
-    status: 'inactive'
-  },
-];
+// const mockPatients = [
+//   {
+//     id: 1,
+//     name: 'Maria Silva',
+//     email: 'maria.silva@email.com',
+//     phone: '(11) 99999-1234',
+//     birthDate: '1985-03-15',
+//     address: 'Rua das Flores, 123',
+//     lastVisit: '2024-01-15',
+//     status: 'active'
+//   },
+//   {
+//     id: 2,
+//     name: 'João Santos',
+//     email: 'joao.santos@email.com',
+//     phone: '(11) 88888-5678',
+//     birthDate: '1992-07-22',
+//     address: 'Av. Principal, 456',
+//     lastVisit: '2024-01-10',
+//     status: 'active'
+//   },
+//   {
+//     id: 3,
+//     name: 'Ana Costa',
+//     email: 'ana.costa@email.com',
+//     phone: '(11) 77777-9012',
+//     birthDate: '1978-11-08',
+//     address: 'Rua do Centro, 789',
+//     lastVisit: '2023-12-20',
+//     status: 'inactive'
+//   },
+// ];
 
 export function Patients() {
-  const [patients, setPatients] = useState(mockPatients);
+  // const [patients, setPatients] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
@@ -81,6 +82,8 @@ export function Patients() {
     address: '',
   });
 
+  const { patients, loading: patientsLoading, error: patientsError, pagination } = usePatients();
+
   const filteredPatients = patients.filter(patient =>
     patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     patient.email.toLowerCase().includes(searchTerm.toLowerCase())
@@ -93,7 +96,7 @@ export function Patients() {
       lastVisit: new Date().toISOString().split('T')[0],
       status: 'active'
     };
-    setPatients([...patients, newPatient]);
+    // setPatients([...patients, newPatient]);
     setFormData({ name: '', email: '', phone: '', birthDate: '', address: '' });
     setIsAddDialogOpen(false);
   };
@@ -116,11 +119,11 @@ export function Patients() {
   };
 
   const handleUpdatePatient = () => {
-    setPatients(patients.map(p =>
-      p.id === selectedPatient.id
-        ? { ...p, ...formData }
-        : p
-    ));
+    // setPatients(patients.map(p =>
+    //   p.id === selectedPatient.id
+    //     ? { ...p, ...formData }
+    //     : p
+    // ));
     setFormData({ name: '', email: '', phone: '', birthDate: '', address: '' });
     setSelectedPatient(null);
     setIsEditDialogOpen(false);
@@ -132,7 +135,7 @@ export function Patients() {
   };
 
   const handleConfirmDelete = () => {
-    setPatients(patients.filter(p => p.id !== selectedPatient.id));
+    // setPatients(patients.filter(p => p.id !== selectedPatient.id));
     setSelectedPatient(null);
     setIsDeleteDialogOpen(false);
   };
@@ -152,7 +155,7 @@ export function Patients() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1>Gestão de Pacientes</h1>
-        
+
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <Button>
@@ -255,61 +258,75 @@ export function Patients() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredPatients.map((patient) => (
-                <TableRow key={patient.id}>
-                  <TableCell className="font-medium">{patient.name}</TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <div className="flex items-center text-sm">
-                        <Mail className="h-3 w-3 mr-1" />
-                        {patient.email}
+              {filteredPatients.length > 0 ? (
+                filteredPatients.map((patient) => (
+                  <TableRow key={patient.id}>
+                    <TableCell className="font-medium">{patient.name}</TableCell>
+                    <TableCell>
+                      <div className="space-y-1">
+                        <div className="flex items-center text-sm">
+                          <Mail className="h-3 w-3 mr-1" />
+                          {patient.email}
+                        </div>
+                        <div className="flex items-center text-sm">
+                          <Phone className="h-3 w-3 mr-1" />
+                          {patient.phone}
+                        </div>
                       </div>
+                    </TableCell>
+                    <TableCell>{patient.birthDate ? `${calculateAge(patient.birthDate)} anos` : 'Desconhecido'}</TableCell>
+                    <TableCell>
                       <div className="flex items-center text-sm">
-                        <Phone className="h-3 w-3 mr-1" />
-                        {patient.phone}
+                        {patient.lastAppointment?.date ? (
+                          <>
+                            <Calendar className="h-3 w-3 mr-1" />
+                            {new Date(patient.lastAppointment?.date).toLocaleDateString('pt-BR')}
+                          </>
+                        ) : (
+                          'Desconhecido'
+                        )}
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{calculateAge(patient.birthDate)} anos</TableCell>
-                  <TableCell>
-                    <div className="flex items-center text-sm">
-                      <Calendar className="h-3 w-3 mr-1" />
-                      {new Date(patient.lastVisit).toLocaleDateString('pt-BR')}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={patient.status === 'active' ? 'default' : 'secondary'}>
-                      {patient.status === 'active' ? 'Ativo' : 'Inativo'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleViewPatient(patient)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEditPatient(patient)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteClick(patient)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={patient.status === 'ACTIVE' ? 'default' : 'secondary'}>
+                        {patient.status === 'ACTIVE' ? 'Ativo' : 'Inativo'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleViewPatient(patient)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditPatient(patient)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteClick(patient)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} className="h-24 text-center">
+                    Nenhum paciente encontrado.
                   </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </CardContent>

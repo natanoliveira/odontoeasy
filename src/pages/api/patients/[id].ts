@@ -26,8 +26,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       where: { id, clinicId },
     });
 
+    console.log(existingPatient);
+
     if (!existingPatient) {
-      throw new ApiError(404, 'Patient not found');
+      throw new ApiError(404, 'Paciente não encontrado');
     }
 
     if (req.method === 'GET') {
@@ -111,8 +113,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Method not allowed
-    return res.status(405).json({ error: 'Method not allowed' });
+    // Método não permitido
+    return res.status(405).json({ error: 'Método não permitido' });
   } catch (error) {
     handleError(error, res);
   }

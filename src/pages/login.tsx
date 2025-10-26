@@ -5,37 +5,36 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Smile, Mail, Lock, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
+import { useAuth } from '../contexts/auth-context';
+import { toast } from 'sonner';
 
 export default function Login() {
   const router = useRouter();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const { login, isAuthenticated, loading } = useAuth();
+  const [email, setEmail] = useState('admin@clinicasorriso.com.br');
+  const [password, setPassword] = useState('senha123');
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      setIsAuthenticated(true);
+    if (isAuthenticated && !loading) {
       router.push('/dashboard');
     }
-  }, [router]);
+  }, [isAuthenticated, loading, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('authToken', 'demo-token');
-      localStorage.setItem('userRole', 'clinic');
+    try {
+      await login(email, password);
+      toast.success('Login realizado com sucesso!');
+      router.push('/dashboard');
+    } catch (error: any) {
+      console.error('Login error:', error);
+      toast.error(error.message || 'Erro ao fazer login. Verifique suas credenciais.');
+    } finally {
+      setIsLoading(false);
     }
-
-    router.push('/dashboard');
   };
 
   const handleGoogleLogin = () => {
@@ -43,7 +42,7 @@ export default function Login() {
     console.log('Google login clicked');
   };
 
-  if (isAuthenticated) {
+  if (loading || (isAuthenticated && !loading)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -60,7 +59,7 @@ export default function Login() {
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-dental-navy-blue via-dental-ocean-blue to-dental-light-blue p-12 flex-col justify-between text-white">
         <div className="flex items-center space-x-3">
           <Smile className="h-10 w-10" />
-          <h1 className="text-3xl font-bold">DentalSaaS</h1>
+          <h1 className="text-3xl font-bold">OdontoGestor</h1>
         </div>
 
         <div className="space-y-8">
@@ -115,7 +114,7 @@ export default function Login() {
           <div className="lg:hidden text-center mb-8">
             <div className="flex items-center justify-center space-x-3 mb-4">
               <Smile className="h-10 w-10 text-dental-ocean-blue" />
-              <h1 className="text-3xl font-bold text-dental-navy-blue">DentalSaaS</h1>
+              <h1 className="text-3xl font-bold text-dental-navy-blue">OdontoGestor</h1>
             </div>
             <p className="text-muted-foreground">Gestão Inteligente para sua Clínica</p>
           </div>

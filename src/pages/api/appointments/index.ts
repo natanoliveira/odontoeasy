@@ -127,7 +127,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
 
       if (!patient) {
-        throw new ApiError(404, 'Patient not found');
+        throw new ApiError(404, 'Paciente não encontrado');
       }
 
       // Verify professional exists
@@ -136,7 +136,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
 
       if (!professional) {
-        throw new ApiError(404, 'Professional not found');
+        throw new ApiError(404, 'Professional não encontrado');
       }
 
       // Check for time conflicts
@@ -214,7 +214,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(201).json({ appointment });
     }
 
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ error: 'Método não permitido' });
   } catch (error) {
     handleError(error, res);
   }

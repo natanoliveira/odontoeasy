@@ -2,13 +2,14 @@ import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import { TooltipProvider } from '../components/ui/tooltip';
 import { Toaster } from '../components/ui/sonner';
+import { AuthProvider } from '../contexts/auth-context';
 import '../styles/globals.css';
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <title>DentalSaaS - Gestão de Clínicas Odontológicas</title>
+        <title>OdontoGestor - Gestão de Clínicas Odontológicas</title>
         <meta name="description" content="Sistema completo para gestão de clínicas odontológicas" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
@@ -18,10 +19,12 @@ export default function App({ Component, pageProps }: AppProps) {
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#1e40af" />
       </Head>
-      <TooltipProvider>
-        <Component {...pageProps} />
-        <Toaster />
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Component {...pageProps} />
+          <Toaster />
+        </TooltipProvider>
+      </AuthProvider>
     </>
   );
 }

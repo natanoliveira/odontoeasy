@@ -295,8 +295,6 @@ export function Appointments() {
     setIsAddDialogOpen(false);
   };
 
-  console.log('appointments', appointments);
-
   const handleEditAppointment = () => {
     if (!editingAppointment) return;
 
