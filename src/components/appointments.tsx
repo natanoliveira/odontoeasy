@@ -57,124 +57,129 @@ import {
   MapPin,
   Phone,
   Mail,
-  FileText
+  FileText,
+  Loader2
 } from 'lucide-react';
+import { useAppointments } from '@/hooks/use-appointments';
+import { useProfessionals } from '@/hooks/use-professionals';
+import { usePatients } from '@/hooks/use-patients';
+import { toast } from 'sonner';
 
-// Mock data expandido - integrado com profissionais
-const mockDentists = [
-  { id: 1, name: 'Dr. João Silva', speciality: 'Clínico Geral', color: '#3b82f6', status: 'active' },
-  { id: 2, name: 'Dra. Maria Santos', speciality: 'Ortodontista', color: '#10b981', status: 'active' },
-  { id: 3, name: 'Dr. Carlos Lima', speciality: 'Cirurgião Oral', color: '#f59e0b', status: 'active' },
-  { id: 4, name: 'Dra. Ana Costa', speciality: 'Endodontista', color: '#ef4444', status: 'inactive' },
-];
+// Mock data - COMENTADO APÓS INTEGRAÇÃO COM API
+// const mockDentists = [
+//   { id: 1, name: 'Dr. João Silva', speciality: 'Clínico Geral', color: '#3b82f6', status: 'active' },
+//   { id: 2, name: 'Dra. Maria Santos', speciality: 'Ortodontista', color: '#10b981', status: 'active' },
+//   { id: 3, name: 'Dr. Carlos Lima', speciality: 'Cirurgião Oral', color: '#f59e0b', status: 'active' },
+//   { id: 4, name: 'Dra. Ana Costa', speciality: 'Endodontista', color: '#ef4444', status: 'inactive' },
+// ];
 
-const mockPatients = [
-  { id: 1, name: 'Maria Silva', phone: '(11) 99999-9999', email: 'maria@email.com' },
-  { id: 2, name: 'João Santos', phone: '(11) 88888-8888', email: 'joao@email.com' },
-  { id: 3, name: 'Ana Costa', phone: '(11) 77777-7777', email: 'ana@email.com' },
-  { id: 4, name: 'Pedro Lima', phone: '(11) 66666-6666', email: 'pedro@email.com' },
-  { id: 5, name: 'Lucia Ferreira', phone: '(11) 55555-5555', email: 'lucia@email.com' },
-  { id: 6, name: 'Roberto Alves', phone: '(11) 44444-4444', email: 'roberto@email.com' },
-];
+// const mockPatients = [
+//   { id: 1, name: 'Maria Silva', phone: '(11) 99999-9999', email: 'maria@email.com' },
+//   { id: 2, name: 'João Santos', phone: '(11) 88888-8888', email: 'joao@email.com' },
+//   { id: 3, name: 'Ana Costa', phone: '(11) 77777-7777', email: 'ana@email.com' },
+//   { id: 4, name: 'Pedro Lima', phone: '(11) 66666-6666', email: 'pedro@email.com' },
+//   { id: 5, name: 'Lucia Ferreira', phone: '(11) 55555-5555', email: 'lucia@email.com' },
+//   { id: 6, name: 'Roberto Alves', phone: '(11) 44444-4444', email: 'roberto@email.com' },
+// ];
 
-const mockAppointments = [
-  {
-    id: 1,
-    patientId: 1,
-    patientName: 'Maria Silva',
-    dentistId: 1,
-    dentistName: 'Dr. João Silva',
-    date: '2025-01-22',
-    time: '09:00',
-    endTime: '10:00',
-    type: 'Limpeza e Profilaxia',
-    status: 'confirmed',
-    duration: 60,
-    notes: 'Primeira consulta, paciente com sensibilidade',
-    room: 'Sala 1',
-    value: 150.00
-  },
-  {
-    id: 2,
-    patientId: 2,
-    patientName: 'João Santos',
-    dentistId: 1,
-    dentistName: 'Dr. João Silva',
-    date: '2025-01-22',
-    time: '10:30',
-    endTime: '11:00',
-    type: 'Consulta de Rotina',
-    status: 'pending',
-    duration: 30,
-    notes: 'Verificação de dor no dente 36',
-    room: 'Sala 1',
-    value: 80.00
-  },
-  {
-    id: 3,
-    patientId: 3,
-    patientName: 'Ana Costa',
-    dentistId: 4,
-    dentistName: 'Dra. Ana Costa',
-    date: '2025-01-22',
-    time: '14:00',
-    endTime: '15:30',
-    type: 'Tratamento de Canal',
-    status: 'confirmed',
-    duration: 90,
-    notes: 'Segunda sessão do tratamento endodôntico',
-    room: 'Sala 3',
-    value: 350.00
-  },
-  {
-    id: 4,
-    patientId: 4,
-    patientName: 'Pedro Lima',
-    dentistId: 2,
-    dentistName: 'Dra. Maria Santos',
-    date: '2025-01-22',
-    time: '15:30',
-    endTime: '16:15',
-    type: 'Emergência Ortodôntica',
-    status: 'urgent',
-    duration: 45,
-    notes: 'Quebra de aparelho ortodôntico',
-    room: 'Sala 2',
-    value: 120.00
-  },
-  {
-    id: 5,
-    patientId: 5,
-    patientName: 'Lucia Ferreira',
-    dentistId: 3,
-    dentistName: 'Dr. Carlos Lima',
-    date: '2025-01-23',
-    time: '08:00',
-    endTime: '09:00',
-    type: 'Extração Simples',
-    status: 'confirmed',
-    duration: 60,
-    notes: 'Extração do dente 48',
-    room: 'Sala 4',
-    value: 200.00
-  },
-  {
-    id: 6,
-    patientId: 6,
-    patientName: 'Roberto Alves',
-    dentistId: 2,
-    dentistName: 'Dra. Maria Santos',
-    date: '2025-01-23',
-    time: '10:00',
-    endTime: '11:00',
-    type: 'Manutenção Ortodôntica',
-    status: 'confirmed',
-    duration: 60,
-    notes: 'Troca de elásticos e ajustes',
-    room: 'Sala 2',
-    value: 180.00
-  },
-];
+// const mockAppointments = [
+//   {
+//     id: 1,
+//     patientId: 1,
+//     patientName: 'Maria Silva',
+//     dentistId: 1,
+//     dentistName: 'Dr. João Silva',
+//     date: '2025-01-22',
+//     time: '09:00',
+//     endTime: '10:00',
+//     type: 'Limpeza e Profilaxia',
+//     status: 'confirmed',
+//     duration: 60,
+//     notes: 'Primeira consulta, paciente com sensibilidade',
+//     room: 'Sala 1',
+//     value: 150.00
+//   },
+//   {
+//     id: 2,
+//     patientId: 2,
+//     patientName: 'João Santos',
+//     dentistId: 1,
+//     dentistName: 'Dr. João Silva',
+//     date: '2025-01-22',
+//     time: '10:30',
+//     endTime: '11:00',
+//     type: 'Consulta de Rotina',
+//     status: 'pending',
+//     duration: 30,
+//     notes: 'Verificação de dor no dente 36',
+//     room: 'Sala 1',
+//     value: 80.00
+//   },
+//   {
+//     id: 3,
+//     patientId: 3,
+//     patientName: 'Ana Costa',
+//     dentistId: 4,
+//     dentistName: 'Dra. Ana Costa',
+//     date: '2025-01-22',
+//     time: '14:00',
+//     endTime: '15:30',
+//     type: 'Tratamento de Canal',
+//     status: 'confirmed',
+//     duration: 90,
+//     notes: 'Segunda sessão do tratamento endodôntico',
+//     room: 'Sala 3',
+//     value: 350.00
+//   },
+//   {
+//     id: 4,
+//     patientId: 4,
+//     patientName: 'Pedro Lima',
+//     dentistId: 2,
+//     dentistName: 'Dra. Maria Santos',
+//     date: '2025-01-22',
+//     time: '15:30',
+//     endTime: '16:15',
+//     type: 'Emergência Ortodôntica',
+//     status: 'urgent',
+//     duration: 45,
+//     notes: 'Quebra de aparelho ortodôntico',
+//     room: 'Sala 2',
+//     value: 120.00
+//   },
+//   {
+//     id: 5,
+//     patientId: 5,
+//     patientName: 'Lucia Ferreira',
+//     dentistId: 3,
+//     dentistName: 'Dr. Carlos Lima',
+//     date: '2025-01-23',
+//     time: '08:00',
+//     endTime: '09:00',
+//     type: 'Extração Simples',
+//     status: 'confirmed',
+//     duration: 60,
+//     notes: 'Extração do dente 48',
+//     room: 'Sala 4',
+//     value: 200.00
+//   },
+//   {
+//     id: 6,
+//     patientId: 6,
+//     patientName: 'Roberto Alves',
+//     dentistId: 2,
+//     dentistName: 'Dra. Maria Santos',
+//     date: '2025-01-23',
+//     time: '10:00',
+//     endTime: '11:00',
+//     type: 'Manutenção Ortodôntica',
+//     status: 'confirmed',
+//     duration: 60,
+//     notes: 'Troca de elásticos e ajustes',
+//     room: 'Sala 2',
+//     value: 180.00
+//   },
+// ];
 
 const treatmentTypes = [
   'Consulta de Rotina',
@@ -201,17 +206,66 @@ const timeSlots = [
 ];
 
 export function Appointments() {
-  const [appointments, setAppointments] = useState(mockAppointments);
+  // Integração com API
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const dateStr = selectedDate?.toISOString().split('T')[0];
+
+  const {
+    appointments: apiAppointments,
+    loading: appointmentsLoading,
+    error: appointmentsError,
+    createAppointment,
+    updateAppointment,
+    deleteAppointment
+  } = useAppointments({ date: dateStr });
+
+  const { professionals, loading: professionalsLoading } = useProfessionals();
+  const { patients, loading: patientsLoading } = usePatients();
+
   const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('day');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<any>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [appointmentToDelete, setAppointmentToDelete] = useState<number | null>(null);
+  const [appointmentToDelete, setAppointmentToDelete] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDentist, setFilterDentist] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+
+  // Adaptar appointments da API para o formato do componente
+  const appointments = apiAppointments.map(apt => ({
+    id: apt.id,
+    patientId: apt.patient.id,
+    patientName: apt.patient.name,
+    dentistId: apt.professional?.id || '',
+    dentistName: apt.professional?.name || 'Sem profissional',
+    date: apt.date,
+    time: apt.startTime,
+    endTime: apt.endTime,
+    type: apt.treatment?.name || 'Consulta',
+    status: apt.status.toLowerCase(),
+    duration: 60, // calcular depois
+    notes: apt.notes || '',
+    room: apt.room?.name || '',
+    value: 0 // não disponível na API
+  }));
+
+  // Adaptar profissionais para dentists
+  const mockDentists = professionals.map(prof => ({
+    id: prof.id,
+    name: prof.name,
+    speciality: prof.specialty,
+    color: prof.color,
+    status: prof.status.toLowerCase()
+  }));
+
+  // Adaptar pacientes
+  const mockPatients = patients.map(pat => ({
+    id: pat.id,
+    name: pat.name,
+    phone: pat.phone,
+    email: pat.email
+  }));
 
   const [formData, setFormData] = useState({
     patientId: '',
@@ -584,6 +638,28 @@ export function Appointments() {
       )}
     </div>
   );
+
+  // Loading state
+  if (appointmentsLoading || professionalsLoading || patientsLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  // Error state
+  if (appointmentsError) {
+    return (
+      <Card>
+        <CardContent className="text-center py-12">
+          <p className="text-sm text-destructive">
+            Erro ao carregar agendamentos: {appointmentsError.message}
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">

@@ -20,7 +20,7 @@ export interface Patient {
   status: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
   createdAt: string;
   updatedAt: string;
-  lastAppointment: {
+  lastAppointment?: {
     id: string,
     clinicId: string,
     patientId: string,

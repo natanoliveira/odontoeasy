@@ -28,9 +28,11 @@ import {
   Trash2,
   Phone,
   Mail,
-  Calendar
+  Calendar,
+  Loader2
 } from 'lucide-react';
 import { usePatients } from '@/hooks/use-patients';
+import { toast } from 'sonner';
 
 // Mock data
 // const mockPatients = [
@@ -82,23 +84,39 @@ export function Patients() {
     address: '',
   });
 
-  const { patients, loading: patientsLoading, error: patientsError, pagination } = usePatients();
+  const {
+    patients,
+    loading: patientsLoading,
+    error: patientsError,
+    pagination,
+    createPatient,
+    updatePatient,
+    deletePatient
+  } = usePatients();
 
   const filteredPatients = patients.filter(patient =>
     patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     patient.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleAddPatient = () => {
-    const newPatient = {
-      id: Date.now(),
-      ...formData,
-      lastVisit: new Date().toISOString().split('T')[0],
-      status: 'active'
-    };
-    // setPatients([...patients, newPatient]);
-    setFormData({ name: '', email: '', phone: '', birthDate: '', address: '' });
-    setIsAddDialogOpen(false);
+  const handleAddPatient = async () => {
+    try {
+      const objeCreatePatient: any = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        birthDate: formData.birthDate,
+        address: formData.address,
+        status: 'ACTIVE'
+      }
+      await createPatient(objeCreatePatient);
+      toast.success('Paciente adicionado com sucesso!');
+      setFormData({ name: '', email: '', phone: '', birthDate: '', address: '' });
+      setIsAddDialogOpen(false);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao adicionar paciente');
+      console.error('Error adding patient:', error);
+    }
   };
 
   const handleViewPatient = (patient: any) => {
@@ -118,15 +136,25 @@ export function Patients() {
     setIsEditDialogOpen(true);
   };
 
-  const handleUpdatePatient = () => {
-    // setPatients(patients.map(p =>
-    //   p.id === selectedPatient.id
-    //     ? { ...p, ...formData }
-    //     : p
-    // ));
-    setFormData({ name: '', email: '', phone: '', birthDate: '', address: '' });
-    setSelectedPatient(null);
-    setIsEditDialogOpen(false);
+  const handleUpdatePatient = async () => {
+    if (!selectedPatient) return;
+
+    try {
+      await updatePatient(selectedPatient.id, {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        birthDate: formData.birthDate,
+        address: formData.address,
+      });
+      toast.success('Paciente atualizado com sucesso!');
+      setFormData({ name: '', email: '', phone: '', birthDate: '', address: '' });
+      setSelectedPatient(null);
+      setIsEditDialogOpen(false);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao atualizar paciente');
+      console.error('Error updating patient:', error);
+    }
   };
 
   const handleDeleteClick = (patient: any) => {
@@ -134,10 +162,18 @@ export function Patients() {
     setIsDeleteDialogOpen(true);
   };
 
-  const handleConfirmDelete = () => {
-    // setPatients(patients.filter(p => p.id !== selectedPatient.id));
-    setSelectedPatient(null);
-    setIsDeleteDialogOpen(false);
+  const handleConfirmDelete = async () => {
+    if (!selectedPatient) return;
+
+    try {
+      await deletePatient(selectedPatient.id);
+      toast.success('Paciente excluído com sucesso!');
+      setSelectedPatient(null);
+      setIsDeleteDialogOpen(false);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao excluir paciente');
+      console.error('Error deleting patient:', error);
+    }
   };
 
   const calculateAge = (birthDate: string) => {
@@ -246,89 +282,99 @@ export function Patients() {
           <CardTitle>Lista de Pacientes ({filteredPatients.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Contato</TableHead>
-                <TableHead>Idade</TableHead>
-                <TableHead>Última Visita</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredPatients.length > 0 ? (
-                filteredPatients.map((patient) => (
-                  <TableRow key={patient.id}>
-                    <TableCell className="font-medium">{patient.name}</TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        <div className="flex items-center text-sm">
-                          <Mail className="h-3 w-3 mr-1" />
-                          {patient.email}
+          {patientsLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : patientsError ? (
+            <div className="text-sm text-destructive text-center py-8">
+              Erro ao carregar pacientes: {patientsError.message}
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nome</TableHead>
+                  <TableHead>Contato</TableHead>
+                  <TableHead>Idade</TableHead>
+                  <TableHead>Última Visita</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredPatients.length > 0 ? (
+                  filteredPatients.map((patient) => (
+                    <TableRow key={patient.id}>
+                      <TableCell className="font-medium">{patient.name}</TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="flex items-center text-sm">
+                            <Mail className="h-3 w-3 mr-1" />
+                            {patient.email}
+                          </div>
+                          <div className="flex items-center text-sm">
+                            <Phone className="h-3 w-3 mr-1" />
+                            {patient.phone}
+                          </div>
                         </div>
+                      </TableCell>
+                      <TableCell>{patient.birthDate ? `${calculateAge(patient.birthDate)} anos` : 'Desconhecido'}</TableCell>
+                      <TableCell>
                         <div className="flex items-center text-sm">
-                          <Phone className="h-3 w-3 mr-1" />
-                          {patient.phone}
+                          {patient.lastAppointment?.date ? (
+                            <>
+                              <Calendar className="h-3 w-3 mr-1" />
+                              {new Date(patient.lastAppointment?.date).toLocaleDateString('pt-BR')}
+                            </>
+                          ) : (
+                            'Desconhecido'
+                          )}
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{patient.birthDate ? `${calculateAge(patient.birthDate)} anos` : 'Desconhecido'}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center text-sm">
-                        {patient.lastAppointment?.date ? (
-                          <>
-                            <Calendar className="h-3 w-3 mr-1" />
-                            {new Date(patient.lastAppointment?.date).toLocaleDateString('pt-BR')}
-                          </>
-                        ) : (
-                          'Desconhecido'
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={patient.status === 'ACTIVE' ? 'default' : 'secondary'}>
-                        {patient.status === 'ACTIVE' ? 'Ativo' : 'Inativo'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex space-x-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleViewPatient(patient)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEditPatient(patient)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteClick(patient)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={patient.status === 'ACTIVE' ? 'default' : 'secondary'}>
+                          {patient.status === 'ACTIVE' ? 'Ativo' : 'Inativo'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleViewPatient(patient)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditPatient(patient)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteClick(patient)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} className="h-24 text-center">
+                      Nenhum paciente encontrado.
                     </TableCell>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center">
-                    Nenhum paciente encontrado.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                )}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
 
@@ -374,12 +420,16 @@ export function Patients() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label className="text-muted-foreground">Última Visita</Label>
-                  <p className="text-sm">{new Date(selectedPatient.lastVisit).toLocaleDateString('pt-BR')}</p>
+                  <p className="text-sm">
+                    {selectedPatient.lastAppointment?.date
+                      ? new Date(selectedPatient.lastAppointment.date).toLocaleDateString('pt-BR')
+                      : 'Nenhuma visita registrada'}
+                  </p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Status</Label>
-                  <Badge variant={selectedPatient.status === 'active' ? 'default' : 'secondary'}>
-                    {selectedPatient.status === 'active' ? 'Ativo' : 'Inativo'}
+                  <Badge variant={selectedPatient.status === 'ACTIVE' ? 'default' : 'secondary'}>
+                    {selectedPatient.status === 'ACTIVE' ? 'Ativo' : 'Inativo'}
                   </Badge>
                 </div>
               </div>

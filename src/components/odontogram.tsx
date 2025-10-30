@@ -13,25 +13,29 @@ import {
   SelectValue
 } from './ui/select';
 import { PatientAutocomplete } from './ui/patient-autocomplete';
-import { 
-  Smile, 
-  Save, 
+import {
+  Smile,
+  Save,
   RotateCcw,
   User,
   Calendar,
   FileText,
-  AlertTriangle
+  AlertTriangle,
+  Loader2
 } from 'lucide-react';
+import { useOdontograms } from '@/hooks/use-odontograms';
+import { usePatients } from '@/hooks/use-patients';
+import { toast } from 'sonner';
 
-// Mock patient data
-const mockPatients = [
-  { id: '1', name: 'Maria Silva', email: 'maria.silva@email.com', phone: '(11) 99999-1111' },
-  { id: '2', name: 'João Santos', email: 'joao.santos@email.com', phone: '(11) 99999-2222' },
-  { id: '3', name: 'Ana Costa', email: 'ana.costa@email.com', phone: '(11) 99999-3333' },
-  { id: '4', name: 'Pedro Lima', email: 'pedro.lima@email.com', phone: '(11) 99999-4444' },
-  { id: '5', name: 'Carla Oliveira', email: 'carla.oliveira@email.com', phone: '(11) 99999-5555' },
-  { id: '6', name: 'Roberto Ferreira', email: 'roberto.ferreira@email.com', phone: '(11) 99999-6666' },
-];
+// Mock patient data - COMENTADO APÓS INTEGRAÇÃO COM API
+// const mockPatients = [
+//   { id: '1', name: 'Maria Silva', email: 'maria.silva@email.com', phone: '(11) 99999-1111' },
+//   { id: '2', name: 'João Santos', email: 'joao.santos@email.com', phone: '(11) 99999-2222' },
+//   { id: '3', name: 'Ana Costa', email: 'ana.costa@email.com', phone: '(11) 99999-3333' },
+//   { id: '4', name: 'Pedro Lima', email: 'pedro.lima@email.com', phone: '(11) 99999-4444' },
+//   { id: '5', name: 'Carla Oliveira', email: 'carla.oliveira@email.com', phone: '(11) 99999-5555' },
+//   { id: '6', name: 'Roberto Ferreira', email: 'roberto.ferreira@email.com', phone: '(11) 99999-6666' },
+// ];
 
 // Tooth conditions
 const toothConditions = [
@@ -56,11 +60,54 @@ interface ToothData {
 }
 
 export function Odontogram() {
+  // Integração com API
+  const { patients, loading: patientsLoading } = usePatients({ limit: 100 });
   const [selectedPatient, setSelectedPatient] = useState<string>('');
+
+  const {
+    odontograms,
+    loading: odontogramsLoading,
+    error: odontogramsError,
+    createOdontogram,
+    updateOdontogram
+  } = useOdontograms({ patientId: selectedPatient || undefined });
+
   const [selectedCondition, setSelectedCondition] = useState<string>('healthy');
   const [teethData, setTeethData] = useState<{ [key: number]: ToothData }>({});
   const [generalNotes, setGeneralNotes] = useState('');
   const [selectedTooth, setSelectedTooth] = useState<number | null>(null);
+  const [currentOdontogramId, setCurrentOdontogramId] = useState<string | null>(null);
+
+  // Adaptar patients da API
+  const mockPatients = patients.map(p => ({
+    id: p.id,
+    name: p.name,
+    email: p.email,
+    phone: p.phone
+  }));
+
+  // Carregar odontograma do paciente selecionado
+  useEffect(() => {
+    if (odontograms.length > 0 && selectedPatient) {
+      const latestOdontogram = odontograms[0]; // Pegar o mais recente
+      setCurrentOdontogramId(latestOdontogram.id);
+      setGeneralNotes(latestOdontogram.notes || '');
+
+      // Converter dados da API para o formato do componente
+      const convertedTeethData: { [key: number]: ToothData } = {};
+      Object.entries(latestOdontogram.data.teeth).forEach(([toothNum, toothInfo]) => {
+        const num = parseInt(toothNum);
+        if (toothInfo.conditions.length > 0 || toothInfo.treatments.length > 0) {
+          convertedTeethData[num] = {
+            number: num,
+            condition: toothInfo.conditions[0] || 'healthy',
+            notes: toothInfo.notes || ''
+          };
+        }
+      });
+      setTeethData(convertedTeethData);
+    }
+  }, [odontograms, selectedPatient]);
 
   const handleToothClick = (toothNumber: number) => {
     setSelectedTooth(toothNumber);
@@ -90,13 +137,49 @@ export function Odontogram() {
     setSelectedTooth(null);
   };
 
-  const saveOdontogram = () => {
+  const saveOdontogram = async () => {
     if (!selectedPatient) {
-      alert('Selecione um paciente primeiro');
+      toast.error('Selecione um paciente primeiro');
       return;
     }
-    // Simulate save
-    alert('Odontograma salvo com sucesso!');
+
+    try {
+      // Converter teethData para o formato da API
+      const teethForApi: any = {};
+
+      // Inicializar todos os dentes
+      [...upperTeeth, ...lowerTeeth].forEach(toothNum => {
+        teethForApi[toothNum.toString()] = {
+          notes: teethData[toothNum]?.notes || '',
+          conditions: teethData[toothNum]?.condition ? [teethData[toothNum].condition] : [],
+          treatments: []
+        };
+      });
+
+      const odontogramData = {
+        patientId: selectedPatient,
+        data: {
+          teeth: teethForApi,
+          version: '1.0',
+          lastUpdated: new Date().toISOString()
+        },
+        notes: generalNotes
+      };
+
+      if (currentOdontogramId) {
+        // Atualizar odontograma existente
+        await updateOdontogram(currentOdontogramId, odontogramData);
+        toast.success('Odontograma atualizado com sucesso!');
+      } else {
+        // Criar novo odontograma
+        const created = await createOdontogram(odontogramData);
+        setCurrentOdontogramId(created.id);
+        toast.success('Odontograma salvo com sucesso!');
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao salvar odontograma');
+      console.error('Error saving odontogram:', error);
+    }
   };
 
   const ToothComponent = ({ number, isUpper }: { number: number; isUpper: boolean }) => {
@@ -121,6 +204,28 @@ export function Odontogram() {
       </div>
     );
   };
+
+  // Loading state
+  if (patientsLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  // Error state
+  if (odontogramsError) {
+    return (
+      <Card>
+        <CardContent className="text-center py-12">
+          <p className="text-sm text-destructive">
+            Erro ao carregar odontogramas: {odontogramsError.message}
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">

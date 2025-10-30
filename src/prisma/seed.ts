@@ -9,7 +9,7 @@ async function main() {
   // ================================
   // LIMPEZA INICIAL (DEVELOPMENT ONLY)
   // ================================
-  
+
   console.log('🧹 Limpando dados existentes...')
   await prisma.auditLog.deleteMany()
   await prisma.note.deleteMany()
@@ -30,9 +30,9 @@ async function main() {
   // ================================
   // USUÁRIOS
   // ================================
-  
+
   console.log('👥 Criando usuários...')
-  
+
   const superAdmin = await prisma.user.create({
     data: {
       email: 'admin@denticare.com.br',
@@ -85,9 +85,9 @@ async function main() {
   // ================================
   // ASSINATURA E CLÍNICA
   // ================================
-  
+
   console.log('🏥 Criando assinatura e clínica...')
-  
+
   const subscription = await prisma.subscription.create({
     data: {
       plan: 'PREMIUM',
@@ -135,9 +135,9 @@ async function main() {
   // ================================
   // ASSOCIAÇÕES USUÁRIO-CLÍNICA
   // ================================
-  
+
   console.log('🔗 Criando associações usuário-clínica...')
-  
+
   await prisma.clinicUser.createMany({
     data: [
       {
@@ -186,9 +186,9 @@ async function main() {
   // ================================
   // PROFISSIONAIS
   // ================================
-  
+
   console.log('👨‍⚕️ Criando profissionais...')
-  
+
   const professional1 = await prisma.professional.create({
     data: {
       clinicId: clinic.id,
@@ -246,9 +246,9 @@ async function main() {
   // ================================
   // SALAS/CONSULTÓRIOS
   // ================================
-  
+
   console.log('🏢 Criando salas...')
-  
+
   const room1 = await prisma.room.create({
     data: {
       clinicId: clinic.id,
@@ -285,9 +285,9 @@ async function main() {
   // ================================
   // PACIENTES
   // ================================
-  
+
   console.log('🤝 Criando pacientes...')
-  
+
   const patients = await prisma.patient.createMany({
     data: [
       {
@@ -433,20 +433,20 @@ async function main() {
   // ================================
   // HORÁRIOS DISPONÍVEIS
   // ================================
-  
+
   console.log('📅 Criando horários disponíveis...')
-  
+
   const schedules = []
   const today = new Date()
-  
+
   // Criar horários para os próximos 30 dias
   for (let i = 0; i < 30; i++) {
     const date = new Date(today)
     date.setDate(today.getDate() + i)
-    
+
     // Pular fins de semana (0 = domingo, 6 = sábado)
     if (date.getDay() === 0 || date.getDay() === 6) continue
-    
+
     // Horários da manhã (8:00 às 12:00)
     for (let hour = 8; hour < 12; hour++) {
       schedules.push({
@@ -458,7 +458,7 @@ async function main() {
         available: Math.random() > 0.3, // 70% disponível
         type: 'WORK',
       })
-      
+
       schedules.push({
         clinicId: clinic.id,
         professionalId: professional2.id,
@@ -469,7 +469,7 @@ async function main() {
         type: 'WORK',
       })
     }
-    
+
     // Horários da tarde (14:00 às 18:00)
     for (let hour = 14; hour < 18; hour++) {
       schedules.push({
@@ -481,7 +481,7 @@ async function main() {
         available: Math.random() > 0.3,
         type: 'WORK',
       })
-      
+
       schedules.push({
         clinicId: clinic.id,
         professionalId: professional2.id,
@@ -493,7 +493,7 @@ async function main() {
       })
     }
   }
-  
+
   await prisma.schedule.createMany({
     data: schedules,
   })
@@ -501,15 +501,15 @@ async function main() {
   // ================================
   // AGENDAMENTOS
   // ================================
-  
+
   console.log('📋 Criando agendamentos...')
-  
+
   const tomorrow = new Date()
   tomorrow.setDate(today.getDate() + 1)
-  
+
   const dayAfterTomorrow = new Date()
   dayAfterTomorrow.setDate(today.getDate() + 2)
-  
+
   const nextWeek = new Date()
   nextWeek.setDate(today.getDate() + 7)
 
@@ -596,9 +596,9 @@ async function main() {
   // ================================
   // TRATAMENTOS
   // ================================
-  
+
   console.log('🦷 Criando tratamentos...')
-  
+
   const treatment1 = await prisma.treatment.create({
     data: {
       clinicId: clinic.id,
@@ -645,9 +645,9 @@ async function main() {
   // ================================
   // DOCUMENTOS
   // ================================
-  
+
   console.log('📄 Criando documentos...')
-  
+
   await prisma.document.createMany({
     data: [
       {
@@ -704,9 +704,9 @@ async function main() {
   // ================================
   // ODONTOGRAMAS
   // ================================
-  
+
   console.log('🦷 Criando odontogramas...')
-  
+
   const basicOdontogramData = {
     teeth: {
       // Dentes permanentes superiores
@@ -789,9 +789,9 @@ async function main() {
   // ================================
   // NOTAS
   // ================================
-  
+
   console.log('📝 Criando notas...')
-  
+
   await prisma.note.createMany({
     data: [
       {
@@ -826,9 +826,9 @@ async function main() {
   // ================================
   // PAGAMENTOS
   // ================================
-  
+
   console.log('💳 Criando pagamentos...')
-  
+
   await prisma.payment.createMany({
     data: [
       {
@@ -863,9 +863,9 @@ async function main() {
   // ================================
   // LOGS DE AUDITORIA
   // ================================
-  
+
   console.log('📊 Criando logs de auditoria...')
-  
+
   await prisma.auditLog.createMany({
     data: [
       {

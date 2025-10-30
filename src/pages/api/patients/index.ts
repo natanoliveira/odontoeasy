@@ -101,11 +101,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Validate request body
       const validatedData = createPatientSchema.parse(req.body);
 
+      // console.log(validatedData);
+      // return;
       // Create patient
       const patient = await prisma.patient.create({
         data: {
           ...validatedData,
           clinicId,
+          name: validatedData.name.toUpperCase(),
+          address: validatedData.address?.toUpperCase(),
           birthDate: validatedData.birthDate ? new Date(validatedData.birthDate) : null,
         },
       });

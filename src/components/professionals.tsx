@@ -39,8 +39,8 @@ import {
   TableRow,
 } from './ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { 
-  Plus, 
+import {
+  Plus,
   Search,
   Edit2,
   Trash2,
@@ -52,8 +52,11 @@ import {
   Clock,
   CheckCircle,
   XCircle,
-  AlertCircle
+  AlertCircle,
+  Loader2
 } from 'lucide-react';
+import { useProfessionals } from '@/hooks/use-professionals';
+import { toast } from 'sonner';
 
 const specialties = [
   'Clínico Geral',
@@ -78,79 +81,88 @@ const workDays = [
   { id: 'sunday', label: 'Domingo' }
 ];
 
-// Mock data
-const mockProfessionals = [
-  {
-    id: 1,
-    name: 'Dr. João Silva',
-    email: 'joao.silva@clinica.com',
-    phone: '(11) 99999-9999',
-    cro: 'CRO-SP 12345',
-    specialty: 'Clínico Geral',
-    status: 'active',
-    color: '#3b82f6',
-    startDate: '2024-01-15',
-    workDays: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
-    workHours: { start: '08:00', end: '18:00' },
-    notes: 'Especialista em tratamentos preventivos e restauradores',
-    avatar: null as string | null
-  },
-  {
-    id: 2,
-    name: 'Dra. Maria Santos',
-    email: 'maria.santos@clinica.com',
-    phone: '(11) 88888-8888',
-    cro: 'CRO-SP 67890',
-    specialty: 'Ortodontista',
-    status: 'active',
-    color: '#10b981',
-    startDate: '2023-06-10',
-    workDays: ['tuesday', 'wednesday', 'thursday', 'friday', 'saturday'],
-    workHours: { start: '09:00', end: '17:00' },
-    notes: 'Especialista em aparelhos ortodônticos e alinhadores',
-    avatar: null as string | null
-  },
-  {
-    id: 3,
-    name: 'Dr. Carlos Lima',
-    email: 'carlos.lima@clinica.com',
-    phone: '(11) 77777-7777',
-    cro: 'CRO-SP 54321',
-    specialty: 'Cirurgião Oral',
-    status: 'active',
-    color: '#f59e0b',
-    startDate: '2023-03-20',
-    workDays: ['monday', 'wednesday', 'friday'],
-    workHours: { start: '07:00', end: '15:00' },
-    notes: 'Especialista em extrações e cirurgias orais complexas',
-    avatar: null as string | null
-  },
-  {
-    id: 4,
-    name: 'Dra. Ana Costa',
-    email: 'ana.costa@clinica.com',
-    phone: '(11) 66666-6666',
-    cro: 'CRO-SP 98765',
-    specialty: 'Endodontista',
-    status: 'inactive',
-    color: '#ef4444',
-    startDate: '2023-08-05',
-    workDays: ['monday', 'tuesday', 'thursday'],
-    workHours: { start: '13:00', end: '19:00' },
-    notes: 'Especialista em tratamentos de canal',
-    avatar: null as string | null
-  }
-];
+// Mock data - COMENTADO APÓS INTEGRAÇÃO COM API
+// const mockProfessionals = [
+//   {
+//     id: 1,
+//     name: 'Dr. João Silva',
+//     email: 'joao.silva@clinica.com',
+//     phone: '(11) 99999-9999',
+//     cro: 'CRO-SP 12345',
+//     specialty: 'Clínico Geral',
+//     status: 'active',
+//     color: '#3b82f6',
+//     startDate: '2024-01-15',
+//     workDays: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
+//     workHours: { start: '08:00', end: '18:00' },
+//     notes: 'Especialista em tratamentos preventivos e restauradores',
+//     avatar: null as string | null
+//   },
+//   {
+//     id: 2,
+//     name: 'Dra. Maria Santos',
+//     email: 'maria.santos@clinica.com',
+//     phone: '(11) 88888-8888',
+//     cro: 'CRO-SP 67890',
+//     specialty: 'Ortodontista',
+//     status: 'active',
+//     color: '#10b981',
+//     startDate: '2023-06-10',
+//     workDays: ['tuesday', 'wednesday', 'thursday', 'friday', 'saturday'],
+//     workHours: { start: '09:00', end: '17:00' },
+//     notes: 'Especialista em aparelhos ortodônticos e alinhadores',
+//     avatar: null as string | null
+//   },
+//   {
+//     id: 3,
+//     name: 'Dr. Carlos Lima',
+//     email: 'carlos.lima@clinica.com',
+//     phone: '(11) 77777-7777',
+//     cro: 'CRO-SP 54321',
+//     specialty: 'Cirurgião Oral',
+//     status: 'active',
+//     color: '#f59e0b',
+//     startDate: '2023-03-20',
+//     workDays: ['monday', 'wednesday', 'friday'],
+//     workHours: { start: '07:00', end: '15:00' },
+//     notes: 'Especialista em extrações e cirurgias orais complexas',
+//     avatar: null as string | null
+//   },
+//   {
+//     id: 4,
+//     name: 'Dra. Ana Costa',
+//     email: 'ana.costa@clinica.com',
+//     phone: '(11) 66666-6666',
+//     cro: 'CRO-SP 98765',
+//     specialty: 'Endodontista',
+//     status: 'inactive',
+//     color: '#ef4444',
+//     startDate: '2023-08-05',
+//     workDays: ['monday', 'tuesday', 'thursday'],
+//     workHours: { start: '13:00', end: '19:00' },
+//     notes: 'Especialista em tratamentos de canal',
+//     avatar: null as string | null
+//   }
+// ];
 
 export function Professionals() {
-  const [professionals, setProfessionals] = useState(mockProfessionals);
+  // Integração com API
+  const {
+    professionals: apiProfessionals,
+    loading,
+    error,
+    createProfessional,
+    updateProfessional,
+    deleteProfessional
+  } = useProfessionals();
+
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingProfessional, setEditingProfessional] = useState<any>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [professionalToDelete, setProfessionalToDelete] = useState<number | null>(null);
+  const [professionalToDelete, setProfessionalToDelete] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -158,14 +170,26 @@ export function Professionals() {
     phone: '',
     cro: '',
     specialty: '',
-    status: 'active',
+    status: 'ACTIVE' as 'ACTIVE' | 'INACTIVE',
     color: '#3b82f6',
     startDate: '',
     workDays: [] as string[],
-    workHours: { start: '08:00', end: '18:00' },
+    workStart: '08:00',
+    workEnd: '18:00',
     notes: '',
     avatar: null as string | null
   });
+
+  // Adaptar professionals da API para o formato do componente
+  const professionals = apiProfessionals.map(prof => ({
+    ...prof,
+    status: prof.status.toLowerCase(),
+    workHours: {
+      start: prof.workStart || '08:00',
+      end: prof.workEnd || '18:00'
+    },
+    workDays: prof.workDays || []
+  }));
 
   // Filter professionals
   const filteredProfessionals = professionals.filter(prof => {
@@ -178,54 +202,93 @@ export function Professionals() {
     return matchesSearch && matchesStatus;
   });
 
-  const handleAddProfessional = () => {
+  const handleAddProfessional = async () => {
     if (!formData.name || !formData.email || !formData.cro || !formData.specialty) {
+      toast.error('Preencha todos os campos obrigatórios');
       return;
     }
 
-    const newProfessional = {
-      id: Date.now(),
-      ...formData,
-      workDays: formData.workDays || []
-    };
-    
-    setProfessionals([...professionals, newProfessional]);
-    resetForm();
-    setIsAddDialogOpen(false);
+    try {
+      await createProfessional({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        cro: formData.cro,
+        specialty: formData.specialty,
+        status: formData.status,
+        color: formData.color,
+        startDate: formData.startDate,
+        workDays: formData.workDays,
+        workStart: formData.workStart,
+        workEnd: formData.workEnd,
+        notes: formData.notes,
+        avatar: formData.avatar || undefined
+      });
+      toast.success('Profissional cadastrado com sucesso!');
+      resetForm();
+      setIsAddDialogOpen(false);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao cadastrar profissional');
+      console.error('Error creating professional:', error);
+    }
   };
 
-  const handleEditProfessional = () => {
+  const handleEditProfessional = async () => {
     if (!editingProfessional || !formData.name || !formData.email || !formData.cro || !formData.specialty) {
+      toast.error('Preencha todos os campos obrigatórios');
       return;
     }
 
-    const updatedProfessional = {
-      ...editingProfessional,
-      ...formData,
-      workDays: formData.workDays || []
-    };
-
-    setProfessionals(professionals.map(prof => 
-      prof.id === editingProfessional.id ? updatedProfessional : prof
-    ));
-    
-    resetForm();
-    setIsEditDialogOpen(false);
-    setEditingProfessional(null);
+    try {
+      await updateProfessional(editingProfessional.id, {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        cro: formData.cro,
+        specialty: formData.specialty,
+        status: formData.status,
+        color: formData.color,
+        startDate: formData.startDate,
+        workDays: formData.workDays,
+        workStart: formData.workStart,
+        workEnd: formData.workEnd,
+        notes: formData.notes,
+        avatar: formData.avatar || undefined
+      });
+      toast.success('Profissional atualizado com sucesso!');
+      resetForm();
+      setIsEditDialogOpen(false);
+      setEditingProfessional(null);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao atualizar profissional');
+      console.error('Error updating professional:', error);
+    }
   };
 
-  const handleDeleteProfessional = () => {
-    if (professionalToDelete) {
-      setProfessionals(professionals.filter(prof => prof.id !== professionalToDelete));
+  const handleDeleteProfessional = async () => {
+    if (!professionalToDelete) return;
+
+    try {
+      await deleteProfessional(professionalToDelete);
+      toast.success('Profissional excluído com sucesso!');
       setDeleteConfirmOpen(false);
       setProfessionalToDelete(null);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao excluir profissional');
+      console.error('Error deleting professional:', error);
     }
   };
 
-  const handleStatusChange = (id: number, newStatus: string) => {
-    setProfessionals(professionals.map(prof => 
-      prof.id === id ? { ...prof, status: newStatus } : prof
-    ));
+  const handleStatusChange = async (id: string, newStatus: string) => {
+    try {
+      await updateProfessional(id, {
+        status: newStatus.toUpperCase() as 'ACTIVE' | 'INACTIVE'
+      });
+      toast.success(`Status atualizado para ${newStatus === 'active' ? 'Ativo' : 'Inativo'}`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao atualizar status');
+      console.error('Error updating status:', error);
+    }
   };
 
   const resetForm = () => {
@@ -235,11 +298,12 @@ export function Professionals() {
       phone: '',
       cro: '',
       specialty: '',
-      status: 'active',
+      status: 'ACTIVE',
       color: '#3b82f6',
       startDate: '',
       workDays: [],
-      workHours: { start: '08:00', end: '18:00' },
+      workStart: '08:00',
+      workEnd: '18:00',
       notes: '',
       avatar: null as string | null
     });
@@ -253,18 +317,19 @@ export function Professionals() {
       phone: professional.phone,
       cro: professional.cro,
       specialty: professional.specialty,
-      status: professional.status,
+      status: professional.status.toUpperCase() as 'ACTIVE' | 'INACTIVE',
       color: professional.color,
       startDate: professional.startDate,
       workDays: professional.workDays || [],
-      workHours: professional.workHours,
+      workStart: professional.workHours?.start || professional.workStart || '08:00',
+      workEnd: professional.workHours?.end || professional.workEnd || '18:00',
       notes: professional.notes || '',
       avatar: professional.avatar || null
     });
     setIsEditDialogOpen(true);
   };
 
-  const openDeleteDialog = (professionalId: number) => {
+  const openDeleteDialog = (professionalId: string) => {
     setProfessionalToDelete(professionalId);
     setDeleteConfirmOpen(true);
   };
@@ -406,10 +471,10 @@ export function Professionals() {
           <Input
             id="startTime"
             type="time"
-            value={formData.workHours.start}
-            onChange={(e) => setFormData({ 
-              ...formData, 
-              workHours: { ...formData.workHours, start: e.target.value } 
+            value={formData.workStart}
+            onChange={(e) => setFormData({
+              ...formData,
+              workStart: e.target.value
             })}
           />
         </div>
@@ -418,10 +483,10 @@ export function Professionals() {
           <Input
             id="endTime"
             type="time"
-            value={formData.workHours.end}
-            onChange={(e) => setFormData({ 
-              ...formData, 
-              workHours: { ...formData.workHours, end: e.target.value } 
+            value={formData.workEnd}
+            onChange={(e) => setFormData({
+              ...formData,
+              workEnd: e.target.value
             })}
           />
         </div>
@@ -471,6 +536,28 @@ export function Professionals() {
       </div>
     </div>
   );
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="text-center py-12">
+          <p className="text-sm text-destructive">
+            Erro ao carregar profissionais: {error.message}
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">

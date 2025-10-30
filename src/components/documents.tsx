@@ -27,62 +27,65 @@ import {
   TableHeader,
   TableRow,
 } from './ui/table';
-import { 
-  Upload, 
-  FileText, 
-  Image, 
-  Download, 
-  Eye, 
+import {
+  Upload,
+  FileText,
+  Image,
+  Download,
+  Eye,
   Trash2,
   Search,
   Filter,
   Calendar,
-  User
+  User,
+  Loader2
 } from 'lucide-react';
+import { useDocuments } from '@/hooks/use-documents';
+import { toast } from 'sonner';
 
-// Mock data
-const mockDocuments = [
-  {
-    id: 1,
-    patientName: 'Maria Silva',
-    fileName: 'raio_x_maria_silva.jpg',
-    fileType: 'image',
-    category: 'Exames',
-    uploadDate: '2024-01-15',
-    size: '2.3 MB',
-    status: 'approved'
-  },
-  {
-    id: 2,
-    patientName: 'João Santos',
-    fileName: 'anamnese_joao.pdf',
-    fileType: 'document',
-    category: 'Anamnese',
-    uploadDate: '2024-01-14',
-    size: '154 KB',
-    status: 'pending'
-  },
-  {
-    id: 3,
-    patientName: 'Ana Costa',
-    fileName: 'tratamento_canal_ana.pdf',
-    fileType: 'document',
-    category: 'Tratamento',
-    uploadDate: '2024-01-12',
-    size: '890 KB',
-    status: 'approved'
-  },
-  {
-    id: 4,
-    patientName: 'Pedro Lima',
-    fileName: 'panoramica_pedro.png',
-    fileType: 'image',
-    category: 'Exames',
-    uploadDate: '2024-01-10',
-    size: '5.1 MB',
-    status: 'rejected'
-  },
-];
+// Mock data - COMENTADO APÓS INTEGRAÇÃO COM API
+// const mockDocuments = [
+//   {
+//     id: 1,
+//     patientName: 'Maria Silva',
+//     fileName: 'raio_x_maria_silva.jpg',
+//     fileType: 'image',
+//     category: 'Exames',
+//     uploadDate: '2024-01-15',
+//     size: '2.3 MB',
+//     status: 'approved'
+//   },
+//   {
+//     id: 2,
+//     patientName: 'João Santos',
+//     fileName: 'anamnese_joao.pdf',
+//     fileType: 'document',
+//     category: 'Anamnese',
+//     uploadDate: '2024-01-14',
+//     size: '154 KB',
+//     status: 'pending'
+//   },
+//   {
+//     id: 3,
+//     patientName: 'Ana Costa',
+//     fileName: 'tratamento_canal_ana.pdf',
+//     fileType: 'document',
+//     category: 'Tratamento',
+//     uploadDate: '2024-01-12',
+//     size: '890 KB',
+//     status: 'approved'
+//   },
+//   {
+//     id: 4,
+//     patientName: 'Pedro Lima',
+//     fileName: 'panoramica_pedro.png',
+//     fileType: 'image',
+//     category: 'Exames',
+//     uploadDate: '2024-01-10',
+//     size: '5.1 MB',
+//     status: 'rejected'
+//   },
+// ];
 
 const documentCategories = [
   'Anamnese',
@@ -95,9 +98,29 @@ const documentCategories = [
 ];
 
 export function Documents() {
-  const [documents, setDocuments] = useState(mockDocuments);
+  // Integração com API
+  const {
+    documents: apiDocuments,
+    loading,
+    error,
+    deleteDocument
+  } = useDocuments({ limit: 50 });
+
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Adaptar documents da API para o formato do componente
+  const documents = apiDocuments.map(doc => ({
+    id: doc.id,
+    patientName: doc.patient.name,
+    fileName: doc.name,
+    fileType: doc.mimeType.includes('image') ? 'image' : 'document',
+    category: doc.type,
+    uploadDate: new Date(doc.createdAt).toISOString().split('T')[0],
+    size: `${(doc.size / 1024 / 1024).toFixed(2)} MB`,
+    status: 'approved', // API não tem status
+    url: doc.url
+  }));
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [uploadData, setUploadData] = useState({
@@ -174,6 +197,28 @@ export function Documents() {
       </Badge>
     );
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="text-center py-12">
+          <p className="text-sm text-destructive">
+            Erro ao carregar documentos: {error.message}
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">

@@ -44,6 +44,9 @@ interface UseAppointmentsResult {
   loading: boolean;
   error: Error | null;
   refetch: () => Promise<void>;
+  createAppointment: (data: Partial<Appointment>) => Promise<Appointment>;
+  updateAppointment: (id: string, data: Partial<Appointment>) => Promise<Appointment>;
+  deleteAppointment: (id: string) => Promise<void>;
   pagination?: {
     total: number;
     page: number;
@@ -85,6 +88,23 @@ export function useAppointments(options: UseAppointmentsOptions = {}): UseAppoin
     }
   };
 
+  const createAppointment = async (data: Partial<Appointment>): Promise<Appointment> => {
+    const response = await apiClient.post<{ appointment: Appointment }>('/appointments', data);
+    await fetchAppointments(); // Refresh list
+    return response.appointment;
+  };
+
+  const updateAppointment = async (id: string, data: Partial<Appointment>): Promise<Appointment> => {
+    const response = await apiClient.put<{ appointment: Appointment }>(`/appointments/${id}`, data);
+    await fetchAppointments(); // Refresh list
+    return response.appointment;
+  };
+
+  const deleteAppointment = async (id: string): Promise<void> => {
+    await apiClient.delete(`/appointments/${id}`);
+    await fetchAppointments(); // Refresh list
+  };
+
   useEffect(() => {
     fetchAppointments();
   }, [options.date, options.status, options.professionalId, options.patientId, options.limit]);
@@ -94,6 +114,9 @@ export function useAppointments(options: UseAppointmentsOptions = {}): UseAppoin
     loading,
     error,
     refetch: fetchAppointments,
+    createAppointment,
+    updateAppointment,
+    deleteAppointment,
     pagination,
   };
 }
